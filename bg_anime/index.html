@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Anime BG Maker – by rorin</title>
+<title>Anime BG Maker – RTools Comic</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+<script src="../nav.js"></script>
 <style>
 :root{--bg:#0e0b14;--panel:#171222;--line:#2a2238;--text:#ece8f5;--mut:#9a90b0;--acc:#8b5cf6;--acc2:#c4b5fd;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 html{scroll-padding-top:env(safe-area-inset-top,0px);background:var(--bg)}
@@ -17,7 +18,7 @@ header{display:flex;align-items:baseline;gap:12px;padding:16px 16px 8px;max-widt
 h1{margin:0;font:800 22px/1 Manrope,sans-serif;letter-spacing:-.01em}
 .by{color:var(--acc2);font-weight:600;font-size:14px}
 main{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(300px,1fr);gap:16px;padding:8px 16px 32px;max-width:1200px;margin:0 auto;align-items:start}
-.stage{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-bottom:4px}
+.stage{position:sticky;top:calc(env(safe-area-inset-top,0px) + var(--nav-h,0px));z-index:5;background:var(--bg);padding-bottom:4px}
 canvas{display:block;width:100%;max-height:60vh;object-fit:contain;border-radius:10px;border:1px solid var(--line);background:conic-gradient(#1b1526 25%,#241c33 0 50%,#1b1526 0 75%,#241c33 0) 0 0/20px 20px}
 .bar{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 button{font:600 14px Manrope,sans-serif;color:var(--text);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:9px 14px;cursor:pointer}
@@ -44,7 +45,7 @@ input[type=color]{width:100%;height:30px;background:none;border:1px solid var(--
 </style>
 </head>
 <body>
-<header><h1>Anime BG Maker</h1><span class="by">by rorin</span></header>
+<header><h1>Anime BG Maker</h1></header>
 <main>
 <section class="stage">
   <canvas id="cv" width="1280" height="720"></canvas>

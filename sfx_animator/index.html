@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Comic SFX Maker – by rorin</title>
+<title>SFX Animator – RTools Comic</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Bangers&family=Bowlby+One+SC&family=Lilita+One&family=Luckiest+Guy&family=Manrope:wght@400;600;800&family=Permanent+Marker&family=Titan+One&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Bangers&family=Dela+Gothic+One&family=Manrope:wght@400;600;800&family=Potta+One&family=Rubik+Mono+One&display=swap" rel="stylesheet">
+<script src="../nav.js"></script>
 <style>
 :root{--bg:#0e0b14;--panel:#171222;--line:#2a2238;--text:#ece8f5;--mut:#9a90b0;--acc:#8b5cf6;--acc2:#c4b5fd;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 html{scroll-padding-top:env(safe-area-inset-top,0px);background:var(--bg)}
@@ -17,7 +18,7 @@ header{display:flex;align-items:baseline;gap:12px;padding:16px 16px 8px;max-widt
 h1{margin:0;font:800 22px/1 Manrope,sans-serif;letter-spacing:-.01em}
 .by{color:var(--acc2);font-weight:600;font-size:14px}
 main{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(300px,1fr);gap:16px;padding:8px 16px 32px;max-width:1200px;margin:0 auto;align-items:start}
-.stage{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-bottom:4px}
+.stage{position:sticky;top:calc(env(safe-area-inset-top,0px) + var(--nav-h,0px));z-index:5;background:var(--bg);padding-bottom:4px}
 canvas{display:block;width:100%;max-height:60vh;object-fit:contain;border-radius:10px;border:1px solid var(--line);background:conic-gradient(#1b1526 25%,#241c33 0 50%,#1b1526 0 75%,#241c33 0) 0 0/20px 20px}
 .bar{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;align-items:center}
 button{font:600 14px Manrope,sans-serif;color:var(--text);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:9px 14px;cursor:pointer}
@@ -45,13 +46,12 @@ input[type=file]{grid-column:2/4;font-size:12px;color:var(--mut);max-width:100%}
 </style>
 </head>
 <body>
-<header><h1>Comic SFX Maker</h1><span class="by">by rorin</span></header>
+<header><h1>SFX Animator</h1></header>
 <main>
 <section class="stage">
   <canvas id="cv" width="1280" height="720"></canvas>
   <div class="bar">
     <button id="pp">Pause</button>
-    <button id="bs" class="go" disabled>Export PNG (this frame)</button>
     <button id="bw" class="go" disabled>Export WebM</button>
     <button id="bm" class="go" disabled>Export MP4 (green/blue/black)</button>
     <button id="bp" class="go" disabled>Export PNG sequence (.zip)</button>
@@ -68,29 +68,25 @@ input[type=file]{grid-column:2/4;font-size:12px;color:var(--mut);max-width:100%}
 <script src="https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.3/build/mp4-muxer.js"></script>
 <script>
 const $=s=>document.querySelector(s);
-const cv=$('#cv'),ctx=cv.getContext('2d'),fc=document.createElement('canvas');
-const TAU=Math.PI*2,rad=Math.PI/180;
-const FONTS=['Bangers','Luckiest Guy','Bowlby One SC','Titan One','Lilita One','Anton','Permanent Marker'];
+const cv=$('#cv'),ctx=cv.getContext('2d'),fc=document.createElement('canvas'),fx=fc.getContext('2d');
+const FONTS=['Dela Gothic One','Potta One','Rubik Mono One','Anton','Bangers'];
 const ANIMS=['none','fade','pop','slam','drop','slide','rise','spin','stretch','scatter'];
-const P={text:'POW!',font:'Bangers',size:260,spacing:0,curve:'arc',amt:40,freq:1,speed:.5,grow:.25,jit:.5,skew:-.08,rot:-6,
- c1:'#fde047',c2:'#f97316',oc:'#0b0614',ow:14,ec:'#6d28d9',ed:26,ea:50,
- bt:'spiky',bc1:'#8b5cf6',bc2:'#fde047',bdc:'#6d28d9',bds:16,bn:14,bi:.62,bj:.35,bs:78,bsx:1.5,bow:10,
- ain:'slam',aout:'fade',pop:1,popd:.35,outd:.4,stag:.03,wig:3,wrate:12,shake:6,pul:.04,pcy:3,seed:5,
- dur:2.5,fps:30,res:'1280x720',gw:480,gfps:20,mbg:'Green screen'};
+const P={text:'ゴゴゴゴ',font:'Dela Gothic One',size:200,spacing:0,curve:'none',amt:40,freq:1.2,speed:.5,skew:-.2,rot:-3,
+ c1:'#f5f3ff',c2:'#8b5cf6',s1c:'#1e0b3d',s1w:12,s2c:'#a78bfa',s2w:8,texa:.6,
+ ain:'slam',aout:'fade',pop:1,popd:.35,outd:.4,stag:.04,wig:5,wrate:12,shake:6,dur:2.5,fps:30,res:'1280x720',gw:480,gfps:20,mbg:'Green screen'};
 const DEF={...P};
 const PRE={
- 'POW':{},
- 'BAM':{text:'BAM!',font:'Luckiest Guy',c1:'#fff7ed',c2:'#ef4444',bt:'cloud',bn:10,bc1:'#facc15',bc2:'#fb923c',bdc:'#f59e0b',ec:'#7f1d1d',curve:'none',rot:4,ain:'pop',aout:'pop'},
- 'KA-BOOM':{text:'KA-BOOM!',font:'Bowlby One SC',size:190,c1:'#fde047',c2:'#dc2626',bn:22,bi:.55,bj:.5,bsx:1.9,bc1:'#ef4444',bc2:'#fde047',bdc:'#b91c1c',ec:'#450a0a',curve:'fish',amt:60,shake:10,ain:'stretch',aout:'scatter'},
- 'ZAP':{text:'ZAP!',font:'Anton',size:300,bn:8,bi:.35,bj:.1,bc1:'#22d3ee',bc2:'#ffffff',bdc:'#0891b2',c1:'#ffffff',c2:'#22d3ee',ec:'#164e63',curve:'none',rot:-12,skew:-.2,shake:12,wig:5,ain:'slide',aout:'fade'},
- 'Text only':{bt:'none'}
+ 'Menacing':{},
+ 'Flag':{text:'ババーン',curve:'flag',amt:45,freq:1.3,speed:.6,wig:0,shake:0,skew:0,rot:0,c1:'#fdf4ff',c2:'#c084fc',ain:'slide',aout:'slide'},
+ 'Fish':{text:'ドォォン',curve:'fish',amt:90,wig:2,shake:3,skew:0,rot:0,c1:'#ede9fe',c2:'#7c3aed',ain:'pop',aout:'pop'},
+ 'Arc':{text:'ズキュゥゥン',curve:'arc',amt:70,size:170,wig:3,shake:0,skew:-.1,rot:0,c1:'#ffffff',c2:'#a78bfa',ain:'drop',aout:'scatter'},
+ 'Shake':{text:'WRYYYY',font:'Anton',size:260,curve:'none',shake:16,wig:2,skew:-.15,rot:-2,c1:'#ffffff',c2:'#6d28d9',s1w:10,ain:'stretch',aout:'fade'}
 };
 const S=[
 ['Text',[['text','Text','t'],['font','Font (type an installed font name)','x']]],
-['Burst',[['bt','Shape','s',['spiky','cloud','circle','none']],['bc1','Outer color','c'],['bc2','Inner color','c'],['bdc','Dot color','c'],['bds','Dot spacing',6,40,1],['bn','Spikes',5,40,1],['bi','Spike depth',.2,.95,.01],['bj','Spike variation',0,1,.05],['bs','Size (% of width)',20,140,1],['bsx','Stretch',.6,2.6,.05],['bow','Outline width',0,30,1]]],
-['Color',[['c1','Gradient top','c'],['c2','Gradient bottom','c'],['oc','Outline color','c'],['ow','Outline width',0,40,1],['ec','Extrude color','c'],['ed','Extrude depth',0,80,1],['ea','Extrude angle',0,360,1]]],
-['Shape',[['size','Size',40,600,1],['spacing','Letter spacing',-60,120,1],['curve','Curve','s',['none','flag','arc','fish']],['amt','Curve strength',0,200,1],['freq','Wave count',.2,4,.1],['speed','Wave speed',-3,3,.1],['grow','Perspective grow',-1,1,.05],['jit','Letter jitter',0,1,.05],['skew','Skew',-.6,.6,.01],['rot','Rotation',-45,45,1]]],
-['Motion',[['ain','Animation in','s',ANIMS],['aout','Animation out','s',ANIMS],['pop','Animation strength',0,1.5,.05],['popd','In duration (s)',.1,1.5,.05],['outd','Out duration (s)',.1,1.5,.05],['stag','Letter delay (s)',0,.2,.01],['wig','Wiggle',0,30,1],['wrate','Wiggle speed (fps)',2,30,1],['shake','Shake',0,40,1],['pul','Pulse',0,.2,.01],['pcy','Pulse cycles per loop',1,12,1],['seed','Random seed',1,999,1]]],
+['Shape',[['size','Size',20,500,1],['spacing','Letter spacing',-60,120,1],['curve','Curve','s',['none','flag','arc','fish']],['amt','Curve strength',0,200,1],['freq','Wave count',.2,4,.1],['speed','Wave speed',-3,3,.1],['skew','Skew',-.6,.6,.01],['rot','Rotation',-45,45,1]]],
+['Color',[['c1','Gradient top','c'],['c2','Gradient bottom','c'],['s1c','Inner stroke','c'],['s1w','Inner stroke width',0,60,1],['s2c','Outer stroke','c'],['s2w','Outer stroke width',0,60,1],['tex','Texture (optional)','f'],['texa','Texture opacity',0,1,.05]]],
+['Motion',[['ain','Animation in','s',ANIMS],['aout','Animation out','s',ANIMS],['pop','Animation strength',0,1.5,.05],['popd','In duration (s)',.1,1.5,.05],['outd','Out duration (s)',.1,1.5,.05],['stag','Letter delay (s)',0,.2,.01],['wig','Wiggle',0,30,1],['wrate','Wiggle speed (fps)',2,30,1],['shake','Shake',0,40,1]]],
 ['Export',[['dur','Duration (s)',.5,10,.5],['fps','FPS','s',[24,30,60]],['res','Resolution','s',['1280x720','1920x1080','1080x1080','1080x1920']],['gw','GIF width (px)','s',[320,480,640,800,1000]],['gfps','GIF FPS','s',[12,15,20,25,30]],['mbg','MP4 background','s',['Green screen','Blue screen','Black screen']]]]
 ];
 let TEX=null;const ctl={};
@@ -126,53 +122,32 @@ function AW(st,k,i,I,d){const o={s:1,sx:1,sy:1,dx:0,dy:0,r:0,a:1},c=clamp(k),T=M
  switch(st){case'fade':o.a=1-c;break;case'pop':o.s=Math.max(0,1-k*I);break;case'slam':o.s=1+k*2.5*I;o.a=clamp(1-k*1.2);break;case'drop':o.dy=d*k*700*I;break;case'slide':o.dx=d*k*700*I;o.a=clamp(3*(1-k));break;case'rise':o.dy=-d*k*220*I;o.a=1-c;break;case'spin':o.r=d*k*T*I;o.s=1-c;break;case'stretch':o.sx=1+k*2*I;o.sy=1-c;o.a=clamp(2*(1-k));break;case'scatter':o.dx=(rnd(i*3+1)-.5)*1400*k*I;o.dy=(rnd(i*3+2)-.5)*900*k*I;o.r=(rnd(i*3+3)-.5)*3*k*I;o.a=1-c}
  return o}
 function render(t){
- const W=cv.width,H=cv.height,p=P,ch=[...p.text],n=ch.length||1;
- ctx.clearRect(0,0,W,H);
- ctx.font=`${p.size}px "${p.font.replace(/"/g,'')}","Arial Black",sans-serif`;
- ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';ctx.miterLimit=2;
- const fr=Math.floor(t*p.fps+1e-6),gx=(rnd(fr*31+5)-.5)*2*p.shake,gy=(rnd(fr*17+9)-.5)*2*p.shake,ws=Math.floor(t*p.wrate),pul=1+p.pul*Math.sin(TAU*p.pcy*t/p.dur);
- if(p.bt!=='none'){
-  const kq=clamp(t/p.popd),ki=1-(p.ain==='pop'?eob(kq):p.ain==='drop'?bnc(kq):eo(kq)),ai=AW(p.ain,ki,0,p.pop,-1),ao=AW(p.aout,Math.pow(clamp((t-(p.dur-p.outd))/p.outd),2),0,p.pop,1);
-  const bx=ai.s*ai.sx*ao.s*ao.sx*pul,by=ai.s*ai.sy*ao.s*ao.sy*pul,al=ai.a*ao.a;
-  if(bx*by>1e-4&&al>.001){
-   const R=p.bs/100*W/2,m=p.bn,jr=k=>rnd(k*13+p.seed*7+ws*17);
-   const bp=(Rr,off)=>{const pa=new Path2D(),pt=(a,rr,k)=>{const X=Math.cos(a)*rr*p.bsx,Y=Math.sin(a)*rr;k?pa.lineTo(X,Y):pa.moveTo(X,Y)};
-    if(p.bt==='circle'){pa.ellipse(0,0,Rr*p.bsx,Rr,0,0,TAU);return pa}
-    if(p.bt==='cloud'){for(let k=0;k<m;k++){const a0=k*TAU/m+off,a1=a0+TAU/m,am=a0+TAU/m/2;if(!k)pa.moveTo(Math.cos(a0)*Rr*p.bsx,Math.sin(a0)*Rr);pa.quadraticCurveTo(Math.cos(am)*Rr*1.32*p.bsx,Math.sin(am)*Rr*1.32,Math.cos(a1)*Rr*p.bsx,Math.sin(a1)*Rr)}pa.closePath();return pa}
-    for(let k=0;k<2*m;k++)pt(k*Math.PI/m+off,k%2?Rr*p.bi:Rr*(1+(jr(k+off*50)-.5)*p.bj),k);pa.closePath();return pa};
-   ctx.save();ctx.globalAlpha=al;ctx.translate(W/2+gx+ai.dx+ao.dx,H/2+gy+ai.dy+ao.dy);ctx.rotate(ai.r+ao.r);ctx.scale(bx,by);
-   const o=bp(R,0);ctx.fillStyle=p.bc1;ctx.fill(o);
-   ctx.save();ctx.clip(o);ctx.fillStyle=p.bdc;ctx.beginPath();const s=p.bds,lx=R*p.bsx*1.4,ly=R*1.4;
-   for(let y=-ly,j=0;y<=ly;y+=s*.866,j++)for(let x=-lx+(j%2)*s/2;x<=lx;x+=s){const d=Math.min(1,Math.hypot(x/p.bsx,y)/R),r=s*.52*d*d;if(r<.6)continue;ctx.moveTo(x+r,y);ctx.arc(x,y,r,0,TAU)}
-   ctx.fill();ctx.restore();
-   ctx.strokeStyle=p.oc;ctx.lineJoin='round';
-   if(p.bow>0){ctx.lineWidth=p.bow*1.5;ctx.stroke(o)}
-   const q=bp(R*.72,Math.PI/m*.6);ctx.fillStyle=p.bc2;ctx.fill(q);if(p.bow>0){ctx.lineWidth=p.bow*.6;ctx.stroke(q)}
-   ctx.restore()}}
+ const W=cv.width,H=cv.height,p=P;
+ ctx.clearRect(0,0,W,H);fx.clearRect(0,0,W,H);
+ const ch=[...p.text];if(!ch.length)return;
+ const font=`${p.size}px "${p.font.replace(/"/g,'')}","Hiragino Sans","Noto Sans JP",sans-serif`;
+ for(const g of[ctx,fx]){g.font=font;g.textAlign='center';g.textBaseline='middle';g.lineJoin='round';g.miterLimit=2}
  const w=ch.map(c=>ctx.measureText(c).width+p.spacing),tot=(w.reduce((a,b)=>a+b,0)-p.spacing)||1;
+ const fr=Math.floor(t*p.fps+1e-6),gx=(rnd(fr*31+5)-.5)*2*p.shake,gy=(rnd(fr*17+9)-.5)*2*p.shake,ws=Math.floor(t*p.wrate);
  let x=-tot/2;const L=[];
  ch.forEach((c,i)=>{
   const xc=x+(w[i]-p.spacing)/2;x+=w[i];
   const u=(xc+tot/2)/tot,A=p.amt;let y=0,rot=0,sx=1,sy=1;
-  if(p.curve==='flag'){const k=p.freq*TAU,ph=k*u-TAU*p.speed*t;y=A*Math.sin(ph);rot=Math.atan(A*k/tot*Math.cos(ph))}
+  if(p.curve==='flag'){const k=p.freq*2*Math.PI,ph=k*u-2*Math.PI*p.speed*t;y=A*Math.sin(ph);rot=Math.atan(A*k/tot*Math.cos(ph))}
   else if(p.curve==='arc'){y=-A*(1-(2*u-1)**2);rot=Math.atan(4*A*(2*u-1)/tot)}
   else if(p.curve==='fish'){const b=Math.sin(Math.PI*u);sy=1+A/100*b*1.5;sx=1+A/100*b*.4}
-  const gs=1+p.grow*(u-.5)*1.2,jt=p.jit;
-  sx*=gs*(1+(rnd(i*5+p.seed)-.5)*jt*.5);sy*=gs*(1+(rnd(i*5+p.seed+.5)-.5)*jt*.5);
-  y+=(rnd(i*9+p.seed*3)-.5)*jt*p.size*.18;rot+=(rnd(i*7+p.seed*5)-.5)*jt*.35;
-  const qi=clamp((t-i*p.stag)/p.popd),qo=clamp((t-(p.dur-p.outd-(n-1)*p.stag)-i*p.stag)/p.outd);
+  const qi=clamp((t-i*p.stag)/p.popd),qo=clamp((t-(p.dur-p.outd-(ch.length-1)*p.stag)-i*p.stag)/p.outd);
   const ki=p.ain==='pop'?1-eob(qi):p.ain==='drop'?1-bnc(qi):1-eo(qi),ai=AW(p.ain,ki,i,p.pop,-1),ao=AW(p.aout,qo*qo,i,p.pop,1);
   const wx=(rnd(i*7+ws*13+1)-.5)*2*p.wig,wy=(rnd(i*11+ws*19+3)-.5)*2*p.wig,wr=(rnd(i*5+ws*23+7)-.5)*p.wig*.006;
   L.push({c,xc:xc+wx+ai.dx+ao.dx,y:y+wy+ai.dy+ao.dy,rot:rot+wr+ai.r+ao.r,sx:sx*ai.s*ai.sx*ao.s*ao.sx,sy:sy*ai.s*ai.sy*ao.s*ao.sy,a:ai.a*ao.a})});
- const tr=l=>{ctx.save();ctx.globalAlpha=l.a;ctx.translate(W/2+gx,H/2+gy);ctx.rotate(p.rot*rad);ctx.scale(pul,pul);ctx.translate(l.xc,l.y);ctx.rotate(l.rot);ctx.transform(1,0,p.skew,1,0,0);ctx.scale(l.sx,l.sy)};
- const each=fn=>L.forEach(l=>{if(!vis(l))return;tr(l);fn(l);ctx.restore()});
- const edx=Math.cos(p.ea*rad),edy=Math.sin(p.ea*rad);
- if(p.ed>0){
-  if(p.ow>0)for(let d=p.ed;d>=2;d-=2){ctx.save();ctx.translate(edx*d,edy*d);ctx.strokeStyle=p.oc;ctx.lineWidth=p.ow*2;each(l=>ctx.strokeText(l.c,0,0));ctx.restore()}
-  for(let d=p.ed;d>=1;d-=2){ctx.save();ctx.translate(edx*d,edy*d);ctx.fillStyle=p.ec;each(l=>ctx.fillText(l.c,0,0));ctx.restore()}}
- if(p.ow>0){ctx.strokeStyle=p.oc;ctx.lineWidth=p.ow*2;each(l=>ctx.strokeText(l.c,0,0))}
- each(l=>{const g=ctx.createLinearGradient(0,-p.size*.5,0,p.size*.5);g.addColorStop(0,p.c1);g.addColorStop(1,p.c2);ctx.fillStyle=g;ctx.fillText(l.c,0,0)});
-}
+ const tr=(g,l)=>{g.save();g.globalAlpha=l.a;g.translate(W/2+gx,H/2+gy);g.rotate(p.rot*Math.PI/180);g.translate(l.xc,l.y);g.rotate(l.rot);g.transform(1,0,p.skew,1,0,0);g.scale(l.sx,l.sy)};
+ const stroke=(col,lw)=>{ctx.strokeStyle=col;ctx.lineWidth=lw;L.forEach(l=>{if(!vis(l))return;tr(ctx,l);ctx.strokeText(l.c,0,0);ctx.restore()})};
+ if(p.s2w>0)stroke(p.s2c,(p.s1w+p.s2w)*2);
+ if(p.s1w>0)stroke(p.s1c,p.s1w*2);
+ L.forEach(l=>{if(!vis(l))return;tr(fx,l);const g=fx.createLinearGradient(0,-p.size*.5,0,p.size*.5);g.addColorStop(0,p.c1);g.addColorStop(1,p.c2);fx.fillStyle=g;fx.fillText(l.c,0,0);fx.restore()});
+ if(TEX&&p.texa>0){const k=Math.max(W/TEX.width,H/TEX.height);fx.save();fx.globalCompositeOperation='source-atop';fx.globalAlpha=p.texa;fx.drawImage(TEX,(W-TEX.width*k)/2,(H-TEX.height*k)/2,TEX.width*k,TEX.height*k);fx.restore()}
+ ctx.drawImage(fc,0,0)}
+
 let playing=true,t0=performance.now(),tp=0,busy=false;
 function loop(now){if(!busy){if(playing)tp=((now-t0)/1000)%P.dur;render(tp)}requestAnimationFrame(loop)}
 $('#pp').onclick=e=>{playing=!playing;if(playing)t0=performance.now()-tp*1000;e.target.textContent=playing?'Pause':'Play'};
@@ -189,7 +164,7 @@ function zip(fs){const parts=[],cd=[],enc=new TextEncoder();let off=0;
  en.setUint32(0,0x06054b50,true);en.setUint16(8,fs.length,true);en.setUint16(10,fs.length,true);en.setUint32(12,cs,true);en.setUint32(16,off,true);
  return new Blob([...parts,...cd,en.buffer],{type:'application/zip'})}
 
-let DL=null;const msg=m=>$('#msg').textContent=m,btn=v=>['#bs','#bw','#bm','#bp','#bg'].forEach(s=>$(s).disabled=v);
+let DL=null;const msg=m=>$('#msg').textContent=m,btn=v=>['#bw','#bm','#bp','#bg'].forEach(s=>$(s).disabled=v);
 async function run(fn){if(busy)return;busy=true;btn(true);
  try{await document.fonts.load(`${P.size}px "${P.font}"`,P.text);await fn();}
  catch(e){msg(e&&e.code==='declined'?'Cancelled.':'Export failed: '+(e.message||e.code||e))}
@@ -198,7 +173,7 @@ $('#bp').onclick=()=>run(async()=>{
  const n=Math.round(P.dur*P.fps),fs=[];
  for(let f=0;f<n;f++){render(f/P.fps);const b=await new Promise(r=>cv.toBlob(r,'image/png'));
   fs.push({n:`frame_${String(f+1).padStart(4,'0')}.png`,d:new Uint8Array(await b.arrayBuffer())});msg(`Render ${f+1}/${n}`)}
- await DL.save({filename:'comic-sfx-frames.zip',data:zip(fs)});msg('PNG sequence saved.')});
+ await DL.save({filename:'sfx-frames.zip',data:zip(fs)});msg('PNG sequence saved.')});
 $('#bw').onclick=()=>run(async()=>{
  const n=Math.round(P.dur*P.fps),st=cv.captureStream(0),tk=st.getVideoTracks()[0];
  const mt=['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'].find(m=>MediaRecorder.isTypeSupported(m));
@@ -207,7 +182,7 @@ $('#bw').onclick=()=>run(async()=>{
  const done=new Promise(r=>rec.onstop=r);rec.start();
  for(let f=0;f<n;f++){render(f/P.fps);tk.requestFrame();msg(`Render ${f+1}/${n}`);await new Promise(r=>setTimeout(r,1000/P.fps))}
  rec.stop();await done;
- await DL.save({filename:'comic-sfx.webm',data:new Blob(chunks,{type:'video/webm'})});msg('WebM saved.')});
+ await DL.save({filename:'sfx.webm',data:new Blob(chunks,{type:'video/webm'})});msg('WebM saved.')});
 
 function quant(h){
  const cols=[];for(let c=0;c<32768;c++)if(h[c])cols.push(c);
@@ -244,7 +219,7 @@ $('#bg').onclick=()=>run(async()=>{
   B.push(new Uint8Array([33,249,4,9,...u16(dl),0,0,44,0,0,0,0,...u16(w),...u16(h),0,8]),...lzw(ix),new Uint8Array([0]));
   msg(`Encode ${f+1}/${n}`);if(f%4===3)await new Promise(r=>setTimeout(r))}
  B.push(new Uint8Array([59]));
- await DL.save({filename:'comic-sfx.gif',data:new Blob(B,{type:'image/gif'})});msg('GIF saved.')});
+ await DL.save({filename:'sfx.gif',data:new Blob(B,{type:'image/gif'})});msg('GIF saved.')});
 
 const mp4=(id,name)=>{$(id).onclick=()=>run(async()=>{
  if(!window.VideoEncoder||!window.Mp4Muxer)throw new Error('MP4 export needs a recent Chrome or Edge over HTTPS. Use the PNG sequence instead.');
@@ -260,8 +235,7 @@ const mp4=(id,name)=>{$(id).onclick=()=>run(async()=>{
   msg(`Encode ${f+1}/${n}`);if(f%5===4)await new Promise(r=>setTimeout(r))}
  await enc.flush();if(err)throw err;mx.finalize();
  await DL.save({filename:name,data:new Blob([mx.target.buffer],{type:'video/mp4'})});msg('MP4 saved.')})};
-mp4('#bm','comic-sfx.mp4');
-$('#bs').onclick=()=>run(async()=>{render(tp);const b=await new Promise(r=>cv.toBlob(r,'image/png'));await DL.save({filename:'comic-sfx.png',data:b});msg('PNG saved.')});
+mp4('#bm','sfx.mp4');
 build();$('#fl').replaceChildren(...FONTS.map(f=>new Option(f,f)));requestAnimationFrame(loop);
 const FB={save:async({filename,data})=>{const b=data instanceof Blob?data:new Blob([data]),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),5000);return{status:'saved'}}};
 const useFB=()=>{DL=FB;btn(false)};
