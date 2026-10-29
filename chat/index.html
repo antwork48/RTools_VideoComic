@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chat Maker – RTools Comic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;800&family=Bangers&family=Fredoka:wght@400;600;700&family=Manrope:wght@400;600;800&family=Mochiy+Pop+One&family=Orbitron:wght@700&family=Patrick+Hand&family=Press+Start+2P&family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
+<script src="../nav.js"></script>
+<style>
+:root{--bg:#0e0b14;--panel:#171222;--line:#2a2238;--text:#ece8f5;--mut:#9a90b0;--acc:#8b5cf6;--acc2:#c4b5fd;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px);background:var(--bg)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--text);font:400 15px/1.45 Manrope,system-ui,sans-serif;min-height:100%}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+header{display:flex;align-items:baseline;gap:12px;padding:16px 16px 8px;max-width:1200px;margin:0 auto}
+h1{margin:0;font:800 22px/1 Manrope,sans-serif;letter-spacing:-.01em}
+.by{color:var(--acc2);font-weight:600;font-size:14px}
+main{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(300px,1fr);gap:16px;padding:8px 16px 32px;max-width:1200px;margin:0 auto;align-items:start}
+.stage{position:sticky;top:calc(env(safe-area-inset-top,0px) + var(--nav-h,0px));z-index:5;background:var(--bg);padding-bottom:4px}
+canvas{display:block;width:100%;max-height:60vh;object-fit:contain;border-radius:10px;border:1px solid var(--line);background:conic-gradient(#1b1526 25%,#241c33 0 50%,#1b1526 0 75%,#241c33 0) 0 0/20px 20px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;align-items:center}
+button{font:600 14px Manrope,sans-serif;color:var(--text);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:9px 14px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button.go{background:var(--acc);border-color:var(--acc);color:#fff}
+button.go:hover{background:#7c3aed}
+button:disabled{opacity:.45;cursor:not-allowed}
+:focus-visible{outline:2px solid var(--acc2);outline-offset:2px}
+#msg{color:var(--mut);font-size:13px;min-height:1.4em;margin-top:6px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:6px 14px 10px}
+.pre{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.pre button{padding:6px 11px;font-size:13px}
+details{border-top:1px solid var(--line);padding:4px 0}
+details:first-of-type{border-top:0}
+summary{cursor:pointer;font-weight:800;padding:8px 0;color:var(--acc2)}
+label{display:grid;grid-template-columns:1fr minmax(0,1.3fr) 40px;gap:8px;align-items:center;padding:4px 0;font-size:13px;color:var(--mut)}
+label>*:nth-child(2){grid-column:2}
+output{text-align:right;font-variant-numeric:tabular-nums;color:var(--text);font-size:12px}
+input[type=text],select{width:100%;grid-column:2/4;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:7px 8px;font:inherit}
+input[type=range]{width:100%;accent-color:var(--acc)}
+input[type=color]{width:100%;height:30px;background:none;border:1px solid var(--line);border-radius:6px;padding:2px;grid-column:2/4}
+input[type=file]{grid-column:2/4;font-size:12px;color:var(--mut);max-width:100%}
+.note{font-size:12px;color:var(--mut);margin:6px 0 0}
+@media(max-width:820px){main{grid-template-columns:1fr}canvas{max-height:34vh}}
+textarea{width:100%;grid-column:2/4;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:7px 8px;font:inherit;resize:vertical}
+.sw{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}
+.sw button{width:26px;height:26px;border-radius:50%;padding:0;border:2px solid var(--line)}
+.sw button:hover{border-color:#fb923c}
+</style>
+</head>
+<body>
+<header><h1>Chat Maker</h1></header>
+<main>
+<section class="stage">
+  <canvas id="cv" width="1280" height="720"></canvas>
+  <div class="bar">
+    <button id="pp">Pause</button>
+    <button id="bs" class="go" disabled>Export PNG</button>
+    <button id="bb" class="go" disabled>Export batch (.zip)</button>
+    <button id="bw" class="go" disabled>Export WebM</button>
+    <button id="bm" class="go" disabled>Export MP4 (green/blue/black)</button>
+    <button id="bp" class="go" disabled>Export PNG sequence (.zip)</button>
+    <button id="bg" class="go" disabled>Export GIF</button>
+  </div>
+  <div id="msg"></div>
+</section>
+<section class="panel">
+  <div class="pre" id="pre"></div>
+  <div id="ui"></div><datalist id="fl"></datalist>
+  <p class="note">The box is sized from the text itself, so margins stay exact for every message. Pick a theme color (swatches or any color), then a design preset. Batch: put one chat per line in the Batch list, optionally as "Label | message", and export every line as a PNG in one zip. Exports are transparent; MP4 fills the background with the chosen screen color for keying. GIF supports only 256 colors and on/off transparency.</p>
+</section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.3/build/mp4-muxer.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+const cv=$('#cv'),ctx=cv.getContext('2d'),fc=document.createElement('canvas');
+const TAU=Math.PI*2,rad=Math.PI/180;
+const FONTS=['Fredoka','Baloo 2','Zen Maru Gothic','Mochiy Pop One','Bangers','Orbitron','Press Start 2P','Patrick Hand'];
+const ANIMS=['none','fade','pop','slam','drop','slide','rise','spin','stretch','scatter'];
+const DESIGNS=['classic','sticker','comic','neon','pixel','ribbon','memo'];
+const PAL=[['Green','#6cc04a'],['Mint','#3ddc97'],['Teal','#14b8a6'],['Cyan','#22bfe6'],['Sky blue','#4aa3ff'],['Blue','#3b6df0'],['Indigo','#6366f1'],['Purple','#a259f7'],['Magenta','#e04fd8'],['Pink','#ff6fae'],['Rose','#fb5f7f'],['Red','#ee3b3b'],['Orange','#ff8a2a'],['Gold','#f5b82e'],['Yellow','#f7e03c'],['Silver','#cfd6e4'],['Black','#2b2b3a'],['Brown','#a8744a']];
+const P={label:'Chat',text:'Gedang is Banana',font:'Fredoka',size:64,lsz:44,bold:'on',lh:1.15,align:'center',maxw:900,ty:0,
+ base:'#6cc04a',tcm:'theme',tlt:40,boxmode:'light',
+ design:'classic',padx:44,pady:26,minw:0,rad:26,shx:12,shy:12,dash:'on',tabx:28,tov:.45,tow:0,tom:'theme',toc:'#ffffff',glow:0,glo:.8,gls:1,glm:'theme',glc:'#7dff8a',tsm:'theme',tsc:'#000000',tso:.35,tsx:0,tsy:4,tsb:0,tilt:0,
+ ain:'pop',aout:'fade',pop:1,popd:.4,outd:.35,stag:.12,float:3,pcy:2,
+ batch:'Ayame | gedang is banana\nSubaru | wait, what?\nAki | LET\'S GOOO',
+ res:'Auto fit',mg:40,px:50,py:50,dur:3,fps:30,gw:480,gfps:20,mbg:'Green screen'};
+const DEF={...P};
+const PRE={
+ 'Classic':{},
+ 'Sticker':{design:'sticker',font:'Baloo 2',rad:30,shx:0,shy:0,dash:'off',tow:0,glow:0},
+ 'Comic':{design:'comic',font:'Bangers',size:72,lsz:46,rad:8,shx:16,shy:16,dash:'off',tow:0,glow:0,tcm:'dark',bold:'off'},
+ 'Neon':{design:'neon',font:'Orbitron',size:50,lsz:32,boxmode:'dark',rad:18,glow:20,gls:2,glo:.9,tso:0,tow:0,dash:'off',tcm:'white',shx:0,shy:0},
+ 'Pixel':{design:'pixel',font:'Press Start 2P',size:30,lsz:22,rad:0,padx:36,pady:30,dash:'off',tow:0,glow:0,lh:1.5,tcm:'dark',bold:'off',tov:.5},
+ 'Ribbon':{design:'ribbon',font:'Zen Maru Gothic',size:56,lsz:40,rad:20,shx:0,shy:8,dash:'off',tow:0,glow:0,tcm:'dark'},
+ 'Memo':{design:'memo',font:'Patrick Hand',size:62,lsz:42,rad:6,tilt:-2,shx:0,shy:10,dash:'off',tow:0,glow:0,tcm:'dark',bold:'off'}
+};
+const S=[
+['Text',[['label','Label (tab)','t'],['text','Message','m'],['font','Font (type an installed font name)','x'],['size','Message size',16,160,1],['lsz','Label size',12,120,1],['bold','Bold','s',['on','off']],['lh','Line height',.9,1.8,.05],['align','Align','s',['center','left']],['maxw','Wrap width (px, 0 = off)',0,2000,10],['ty','Typewriter (chars/sec, 0 = off)',0,60,1]]],
+['Theme',[['base','Theme color','c'],['tcm','Text color','s',['theme','dark','white']],['tlt','Text lightness',15,70,1],['boxmode','Box','s',['light','tint','dark']]]],
+['Style',[['design','Design','s',DESIGNS],['padx','Padding X',8,120,1],['pady','Padding Y',6,100,1],['minw','Min box width',0,1200,10],['rad','Corner radius',0,60,1],['shx','Shadow X',-30,40,1],['shy','Shadow Y',-30,40,1],['dash','Dashed border','s',['on','off']],['tabx','Tab offset X',-40,300,1],['tov','Tab overlap',.1,.9,.05],['tilt','Tilt (deg)',-10,10,.5]]],
+['Text effects',[['tow','Outline width (0 = off)',0,12,.5],['tom','Outline color','s',['theme','white','dark','custom']],['toc','Custom outline color','c'],['tsm','Drop shadow color','s',['theme','custom']],['tsc','Custom shadow color','c'],['tso','Shadow opacity',0,1,.05],['tsx','Shadow X',-30,30,1],['tsy','Shadow Y',-30,30,1],['tsb','Shadow blur',0,30,1],['glm','Glow color','s',['theme','custom']],['glc','Custom glow color','c'],['glow','Glow size (0 = off)',0,60,1],['gls','Glow strength',1,5,1],['glo','Glow opacity',0,1,.05]]],
+['Motion',[['ain','Animation in','s',ANIMS],['aout','Animation out','s',ANIMS],['pop','Strength',0,1.5,.05],['popd','In duration (s)',.1,1.5,.05],['outd','Out duration (s)',.1,1.5,.05],['stag','Tab and box delay (s)',0,.5,.01],['float','Float (px)',0,40,1],['pcy','Float cycles per loop',1,12,1]]],
+['Batch',[['batch','Batch list (one chat per line, "Label | message")','m']]],
+['Canvas and export',[['res','Canvas','s',['Auto fit','1280x720','1920x1080','1080x1080','1080x1920']],['mg','Auto fit margin (px)',0,300,1],['px','Position X (%)',0,100,1],['py','Position Y (%)',0,100,1],['dur','Duration (s)',.5,10,.5],['fps','FPS','s',[24,30,60]],['gw','GIF width (px)','s',[320,480,640,800,1000]],['gfps','GIF FPS','s',[12,15,20,25,30]],['mbg','MP4 background','s',['Green screen','Blue screen','Black screen']]]]
+];
+function swatches(){const box=document.createElement('div');box.className='sw';PAL.forEach(([n,c])=>{const b=document.createElement('button');b.style.background=c;b.title=n;b.setAttribute('aria-label',n);b.onclick=()=>{P.base=c;sync()};box.append(b)});const g=document.querySelectorAll('#ui details')[1];g.insertBefore(box,g.children[1])}
+let TEX=null;const ctl={};
+function setRes(){const m=/(\d+)x(\d+)/.exec(P.res);if(m){cv.width=+m[1];cv.height=+m[2]}}
+function build(){
+ S.forEach(([g,items],gi)=>{
+  const d=document.createElement('details');d.open=gi<4;d.innerHTML=`<summary>${g}</summary>`;
+  items.forEach(([k,l,a,b,c])=>{
+   const row=document.createElement('label');row.innerHTML=`<span>${l}</span>`;let el;
+   if(a==='t'){el=document.createElement('input');el.type='text'}
+   else if(a==='m'){el=document.createElement('textarea');el.rows=3}
+   else if(a==='c'){el=document.createElement('input');el.type='color'}
+   else if(a==='x'){el=document.createElement('input');el.type='text';el.setAttribute('list','fl');const clr=()=>{if(el.value){el.dataset.p=el.value;el.placeholder=el.value;el.value=''}};el.onfocus=el.onmousedown=clr;el.onblur=()=>{if(!el.value&&el.dataset.p)el.value=el.dataset.p}}
+   else if(a==='s'){el=document.createElement('select');b.forEach(o=>el.add(new Option(o,o)))}
+   else if(a==='f'){el=document.createElement('input');el.type='file';el.accept='image/*';
+    el.onchange=()=>{const f=el.files[0];if(!f){TEX=null;return}const im=new Image();im.onload=()=>TEX=im;im.src=URL.createObjectURL(f)};
+    row.append(el);d.append(row);return}
+   else{el=document.createElement('input');el.type='range';el.min=a;el.max=b;el.step=c;const o=document.createElement('output');el.out=o}
+   el.oninput=()=>{P[k]=typeof DEF[k]==='number'?+el.value:el.value;if(el.out)el.out.textContent=el.value;if(k==='res')setRes();if(k==='font'||k==='text')loadFonts()};
+   ctl[k]=el;row.append(el);if(el.out)row.append(el.out);d.append(row)});
+  if(gi===0){const b=document.createElement('button');b.textContent='Load fonts from this PC';b.onclick=loadLocal;const n=document.createElement('p');n.className='note';n.id='fnote';n.textContent='Type the font name exactly as installed on your PC, or load the list.';const fs=document.createElement('p');fs.className='note';fs.id='fstat';d.append(b,n,fs)}
+  $('#ui').append(d)});
+ Object.keys(PRE).forEach(n=>{const b=document.createElement('button');b.textContent=n;b.onclick=()=>{const k={base:P.base,text:P.text,label:P.label,batch:P.batch};Object.assign(P,DEF,PRE[n],k);sync()};$('#pre').append(b)});
+ sync()}
+function sync(){for(const k in ctl){ctl[k].value=P[k];if(ctl[k].out)ctl[k].out.textContent=P[k]}setRes();loadFonts()}
+const hasFont=n=>{const g=document.createElement('canvas').getContext('2d'),t='mmmmmmmmmmlli WQ@';const w=f=>{g.font=`72px ${f}`;return g.measureText(t).width};return w(`"${n}",monospace`)!==w('monospace')||w(`"${n}",serif`)!==w('serif')};
+const loadFonts=()=>{const n=P.font.replace(/"/g,'');return document.fonts.load(`60px "${n}"`,P.text).catch(()=>{}).then(()=>{const e=$('#fstat');if(!e)return;e.textContent=hasFont(n)?'':`"${n}" was not found on this device, so a fallback font is shown. Check the exact name.`;e.style.color='#fb923c'})};
+async function loadLocal(){const n=$('#fnote');if(!window.queryLocalFonts){n.textContent='This browser does not support listing PC fonts (desktop Chrome or Edge does). Type the font name manually.';return}try{const l=await queryLocalFonts(),fam=[...new Set(l.map(f=>f.family))].sort();$('#fl').replaceChildren(...[...FONTS,...fam].map(f=>new Option(f,f)));n.textContent=`${fam.length} fonts loaded. Click the font field to choose.`}catch(e){n.textContent='Font access was denied or blocked here. Type the font name manually.'}}
+
+const rnd=n=>{const x=Math.sin(n*127.1+311.7)*43758.5453;return x-Math.floor(x)};
+const eob=q=>{const c=2.2,x=q-1;return 1+(c+1)*x*x*x+c*x*x};
+const clamp=q=>Math.max(0,Math.min(1,q)),eo=q=>1-(1-q)**3,vis=l=>l.sx*l.sy>1e-4&&l.a>.001,bnc=q=>{const n=7.5625,d=2.75;if(q<1/d)return n*q*q;if(q<2/d)return n*(q-=1.5/d)*q+.75;if(q<2.5/d)return n*(q-=2.25/d)*q+.9375;return n*(q-=2.625/d)*q+.984375};
+function AW(st,k,i,I,d){const o={s:1,sx:1,sy:1,dx:0,dy:0,r:0,a:1},c=clamp(k),T=Math.PI*2;
+ switch(st){case'fade':o.a=1-c;break;case'pop':o.s=Math.max(0,1-k*I);break;case'slam':o.s=1+k*2.5*I;o.a=clamp(1-k*1.2);break;case'drop':o.dy=d*k*700*I;break;case'slide':o.dx=d*k*700*I;o.a=clamp(3*(1-k));break;case'rise':o.dy=-d*k*220*I;o.a=1-c;break;case'spin':o.r=d*k*T*I;o.s=1-c;break;case'stretch':o.sx=1+k*2*I;o.sy=1-c;o.a=clamp(2*(1-k));break;case'scatter':o.dx=(rnd(i*3+1)-.5)*1400*k*I;o.dy=(rnd(i*3+2)-.5)*900*k*I;o.r=(rnd(i*3+3)-.5)*3*k*I;o.a=1-c}
+ return o}
+
+function hexHsl(h){const n=parseInt(h.slice(1),16),r=(n>>16&255)/255,g=(n>>8&255)/255,b=(n&255)/255,mx=Math.max(r,g,b),mn=Math.min(r,g,b),l=(mx+mn)/2,d=mx-mn;let hh=0,s=0;if(d){s=d/(1-Math.abs(2*l-1));hh=mx===r?((g-b)/d+6)%6:mx===g?(b-r)/d+2:(r-g)/d+4;hh*=60}return[Math.round(hh),Math.round(s*100),Math.round(l*100)]}
+function theme(){const[h,s,l]=hexHsl(P.base),c=(a,b)=>`hsl(${h},${a}%,${b}%)`;
+ const T={h,main:P.base,shade:c(Math.min(100,s+5),Math.max(16,l-18)),dark:c(Math.min(70,s),16),light:c(Math.min(100,s),96),tint:c(Math.min(100,s),90),hi:c(s,Math.min(88,l+12)),glow:c(95,l>60?60:72),labelC:l>72?c(60,14):'#ffffff'};
+ T.box=P.boxmode==='light'?'#ffffff':P.boxmode==='tint'?T.light:`hsl(${h},35%,10%)`;
+ const dk=P.boxmode==='dark';
+ if(P.tcm==='dark'){T.tf=dk?'#ffffff':T.dark;T.ts=dk?T.shade:'#ffffff'}else if(P.tcm==='white'){T.tf='#ffffff';T.ts=T.shade}else{T.tf=c(Math.min(95,Math.max(55,s)),P.tlt);T.ts=c(Math.min(95,Math.max(55,s)),Math.max(10,P.tlt-18))}
+ return T}
+function wrapLines(txt,maxw){const out=[];txt.split('\n').forEach(par=>{if(!(maxw>0)){out.push(par);return}const sp=par.includes(' '),tk=sp?par.split(' '):[...par],sep=sp?' ':'';let cur='';tk.forEach(w=>{const tst=cur?cur+sep+w:w;if(ctx.measureText(tst).width>maxw&&cur){out.push(cur);cur=w}else cur=tst});out.push(cur)});return out}
+function lay(){
+ const p=P,fam=p.font.replace(/"/g,''),b=p.bold==='on'?'bold ':'',fnt=`${b}${p.size}px "${fam}",sans-serif`,lf=`${b}${p.lsz}px "${fam}",sans-serif`;
+ ctx.font=fnt;const lines=wrapLines(p.text,p.maxw),ws=lines.map(l=>ctx.measureText(l).width);
+ ctx.font=lf;const lw=ctx.measureText(p.label).width;
+ const th=p.lsz*1.5+14,tw=lw+p.lsz*1.4,py=Math.max(p.pady,p.label.trim()?th*p.tov+10:0),bw=Math.max(p.minw,Math.max(10,...ws)+2*p.padx),bh=lines.length*p.size*p.lh+py+p.pady;
+ return{fnt,lf,lines,ws,lw,bw,bh,tw,th,py,tx:p.tabx,ty:-th*(1-p.tov)}}
+const rr=(x,y,w,h,r)=>{ctx.beginPath();ctx.roundRect(x,y,w,h,Math.max(0,r))};
+const pxp=(x,y,w,h,c)=>{ctx.beginPath();[[x+c,y],[x+w-c,y],[x+w-c,y+c],[x+w,y+c],[x+w,y+h-c],[x+w-c,y+h-c],[x+w-c,y+h],[x+c,y+h],[x+c,y+h-c],[x,y+h-c],[x,y+c],[x+c,y+c]].forEach(([a,b],i)=>i?ctx.lineTo(a,b):ctx.moveTo(a,b));ctx.closePath()};
+const scv=document.createElement('canvas'),scx=scv.getContext('2d');
+function msgText(L,T,t,still){
+ const items=[];let left=P.ty>0&&!still?Math.floor(t*P.ty):1e9;
+ L.lines.forEach((ln,i)=>{const y=L.py+(i+.5)*P.size*P.lh,x=P.align==='left'?P.padx:L.bw/2-L.ws[i]/2,s=ln.slice(0,Math.max(0,left));left-=ln.length;if(s)items.push([s,x,y])});
+ if(!items.length)return;
+ const ga=ctx.globalAlpha,tow=P.tow,setup=g=>{g.font=L.fnt;g.textBaseline='middle';g.textAlign='left';g.lineJoin='round'};
+ if(P.tso>0&&(P.tsx||P.tsy||P.tsb)){
+  if(scv.width!==cv.width||scv.height!==cv.height){scv.width=cv.width;scv.height=cv.height}else{scx.setTransform(1,0,0,1,0,0);scx.clearRect(0,0,scv.width,scv.height)}
+  scx.setTransform(ctx.getTransform());setup(scx);scx.fillStyle=scx.strokeStyle=P.tsm==='custom'?P.tsc:T.shade;scx.lineWidth=tow*2;
+  items.forEach(([s,x,y])=>{if(tow>0)scx.strokeText(s,x+P.tsx,y+P.tsy);scx.fillText(s,x+P.tsx,y+P.tsy)});
+  ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=ga*P.tso;if(P.tsb>0&&'filter' in ctx)ctx.filter=`blur(${P.tsb/2}px)`;ctx.drawImage(scv,0,0);ctx.restore()}
+ ctx.save();setup(ctx);
+ if(P.glow>0&&P.glo>0){const gc=P.glm==='custom'?P.glc:T.glow;ctx.globalAlpha=ga*P.glo;ctx.shadowColor=gc;ctx.shadowBlur=P.glow;ctx.fillStyle=gc;for(let k=0;k<P.gls;k++)items.forEach(([s,x,y])=>ctx.fillText(s,x,y));ctx.shadowBlur=0;ctx.shadowColor='transparent';ctx.globalAlpha=ga}
+ if(tow>0){ctx.strokeStyle=P.tom==='custom'?P.toc:P.tom==='white'?'#ffffff':P.tom==='dark'?T.dark:T.ts;ctx.lineWidth=tow*2;items.forEach(([s,x,y])=>ctx.strokeText(s,x,y))}
+ ctx.fillStyle=T.tf;items.forEach(([s,x,y])=>ctx.fillText(s,x,y));ctx.restore()}
+function labelText(L,T,cx,cy,sh){ctx.save();ctx.font=L.lf;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle=T.labelC;if(sh){ctx.shadowColor='rgba(0,0,0,.28)';ctx.shadowOffsetY=3}ctx.fillText(P.label,cx,cy);ctx.restore()}
+function dotsIn(x,y,w,h,s,r,col){ctx.save();ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();ctx.fillStyle=col;ctx.beginPath();for(let j=0,yy=y;yy<y+h+s;yy+=s*.866,j++)for(let xx=x+(j%2)*s/2;xx<x+w+s;xx+=s){ctx.moveTo(xx+r,yy);ctx.arc(xx,yy,r,0,TAU)}ctx.fill();ctx.restore()}
+function drawBox(L,T,t,still){
+ const p=P,bw=L.bw,bh=L.bh,d=p.design,tg=T.glow;
+ ctx.lineJoin='round';
+ if(d==='classic'){rr(p.shx,p.shy,bw,bh,p.rad);ctx.fillStyle=T.shade;ctx.fill();rr(0,0,bw,bh,p.rad);ctx.fillStyle=T.box;ctx.fill();ctx.lineWidth=4;ctx.strokeStyle=T.hi;ctx.stroke();
+  if(p.dash==='on'){rr(10,10,bw-20,bh-20,p.rad-8);ctx.setLineDash([11,8]);ctx.lineWidth=2.5;ctx.strokeStyle=p.boxmode==='dark'?'rgba(255,255,255,.6)':'rgba(30,30,40,.6)';ctx.stroke();ctx.setLineDash([])}
+  msgText(L,T,t,still,tg)}
+ else if(d==='sticker'){ctx.save();ctx.shadowColor='rgba(0,0,0,.4)';ctx.shadowBlur=16;ctx.shadowOffsetY=7;rr(0,0,bw,bh,p.rad);ctx.lineWidth=20;ctx.strokeStyle='#fff';ctx.stroke();ctx.fillStyle='#fff';ctx.fill();ctx.restore();rr(0,0,bw,bh,p.rad);ctx.fillStyle=T.box;ctx.fill();msgText(L,T,t,still,tg)}
+ else if(d==='comic'){ctx.save();rr(p.shx,p.shy,bw,bh,p.rad);ctx.clip();dotsIn(p.shx,p.shy,bw,bh,12,3.6,T.main);ctx.restore();rr(0,0,bw,bh,p.rad);ctx.fillStyle=T.box;ctx.fill();ctx.lineWidth=7;ctx.strokeStyle='#0b0614';ctx.stroke();msgText(L,T,t,still,tg)}
+ else if(d==='neon'){rr(0,0,bw,bh,p.rad);ctx.fillStyle=T.box;ctx.fill();ctx.save();ctx.shadowColor=tg;ctx.shadowBlur=28;ctx.lineWidth=5;ctx.strokeStyle=T.main;ctx.stroke();ctx.stroke();ctx.restore();rr(10,10,bw-20,bh-20,p.rad-6);ctx.lineWidth=2;ctx.strokeStyle=T.main;ctx.globalAlpha=.35;ctx.stroke();ctx.globalAlpha=1;msgText(L,T,t,still,tg)}
+ else if(d==='pixel'){pxp(p.shx,p.shy,bw,bh,8);ctx.fillStyle=T.dark;ctx.fill();pxp(0,0,bw,bh,8);ctx.fillStyle=T.box;ctx.fill();ctx.lineJoin='miter';ctx.lineWidth=6;ctx.strokeStyle=T.dark;ctx.stroke();msgText(L,T,t,still,tg)}
+ else if(d==='ribbon'){ctx.save();ctx.shadowColor='rgba(0,0,0,.3)';ctx.shadowBlur=14;ctx.shadowOffsetY=p.shy;rr(0,0,bw,bh,p.rad);ctx.fillStyle=T.box;ctx.fill();ctx.restore();rr(0,0,bw,bh,p.rad);ctx.lineWidth=8;ctx.strokeStyle=T.main;ctx.stroke();msgText(L,T,t,still,tg)}
+ else{ctx.save();ctx.shadowColor='rgba(0,0,0,.28)';ctx.shadowBlur=14;ctx.shadowOffsetY=p.shy;rr(0,0,bw,bh,p.rad);ctx.fillStyle=p.boxmode==='light'?'#fffef7':T.box;ctx.fill();ctx.restore();
+  ctx.strokeStyle=T.tint;ctx.lineWidth=2;ctx.beginPath();for(let i=1;i<=L.lines.length;i++){const y=L.py+i*p.size*p.lh+4;ctx.moveTo(14,y);ctx.lineTo(bw-14,y)}ctx.stroke();
+  ctx.strokeStyle=`hsl(${T.h},70%,72%)`;ctx.beginPath();ctx.moveTo(p.padx*.55,8);ctx.lineTo(p.padx*.55,bh-8);ctx.stroke();msgText(L,T,t,still,tg)}}
+function drawTab(L,T){
+ const p=P,d=p.design,x=L.tx,y=L.ty,w=L.tw,h=L.th,cx=x+w/2,cy=y+h/2;ctx.lineJoin='round';
+ if(d==='classic'){const g=ctx.createLinearGradient(0,y,0,y+h);g.addColorStop(0,T.hi);g.addColorStop(1,T.main);rr(x,y,w,h,p.rad*.55);ctx.fillStyle=g;ctx.fill();ctx.lineWidth=3;ctx.strokeStyle=T.shade;ctx.stroke();labelText(L,T,cx,cy,true)}
+ else if(d==='sticker'){ctx.save();ctx.shadowColor='rgba(0,0,0,.35)';ctx.shadowBlur=12;ctx.shadowOffsetY=5;rr(x,y,w,h,h/2);ctx.lineWidth=16;ctx.strokeStyle='#fff';ctx.stroke();ctx.fillStyle='#fff';ctx.fill();ctx.restore();rr(x,y,w,h,h/2);ctx.fillStyle=T.main;ctx.fill();labelText(L,T,cx,cy,true)}
+ else if(d==='comic'){ctx.beginPath();[[x+16,y],[x+w,y],[x+w-16,y+h],[x,y+h]].forEach(([a,b],i)=>i?ctx.lineTo(a,b):ctx.moveTo(a,b));ctx.closePath();ctx.fillStyle=T.main;ctx.fill();ctx.lineWidth=6;ctx.strokeStyle='#0b0614';ctx.stroke();labelText(L,T,cx,cy,false)}
+ else if(d==='neon'){rr(x,y,w,h,h/2);ctx.save();ctx.shadowColor=T.glow;ctx.shadowBlur=24;ctx.fillStyle=T.main;ctx.fill();ctx.restore();labelText(L,{labelC:'#0b0614'},cx,cy,false)}
+ else if(d==='pixel'){pxp(x,y,w,h,6);ctx.fillStyle=T.main;ctx.fill();ctx.lineJoin='miter';ctx.lineWidth=6;ctx.strokeStyle=T.dark;ctx.stroke();labelText(L,T,cx,cy,false)}
+ else if(d==='ribbon'){const n=h*.32;ctx.beginPath();ctx.moveTo(x+h*.4,y+h);ctx.lineTo(x+h*.4,y+h+h*.3);ctx.lineTo(x,y+h);ctx.closePath();ctx.fillStyle=T.shade;ctx.fill();
+  ctx.beginPath();[[x,y],[x+w,y],[x+w-n,y+h/2],[x+w,y+h],[x,y+h]].forEach(([a,b],i)=>i?ctx.lineTo(a,b):ctx.moveTo(a,b));ctx.closePath();ctx.fillStyle=T.main;ctx.fill();ctx.fillStyle='rgba(255,255,255,.18)';ctx.fillRect(x,y,w-n*.5,h*.45);labelText(L,T,cx-n*.25,cy,true)}
+ else{ctx.save();ctx.translate(cx,cy);ctx.rotate(-3*rad);ctx.translate(-cx,-cy);ctx.beginPath();const z=6;ctx.moveTo(x,y);ctx.lineTo(x+w,y);for(let i=0;i<=h;i+=z*2){ctx.lineTo(x+w-z,y+i+z/2);ctx.lineTo(x+w,y+i+z)}ctx.lineTo(x+w,y+h);ctx.lineTo(x,y+h);for(let i=h;i>=0;i-=z*2){ctx.lineTo(x+z,y+i-z/2);ctx.lineTo(x,y+i-z)}ctx.closePath();ctx.globalAlpha=.9;ctx.fillStyle=T.main;ctx.fill();ctx.globalAlpha=1;labelText(L,T,cx,cy,false);ctx.restore()}}
+function partX(k,t){const p=P,dd=k*p.stag,kq=clamp((t-dd)/p.popd),ki=1-(p.ain==='pop'?eob(kq):p.ain==='drop'?bnc(kq):eo(kq)),A=AW(p.ain,ki,k,p.pop,-1),B=AW(p.aout,Math.pow(clamp((t-(p.dur-p.outd-dd))/p.outd),2),k,p.pop,1);return{dx:A.dx+B.dx,dy:A.dy+B.dy,r:A.r+B.r,sx:A.s*A.sx*B.s*B.sx,sy:A.s*A.sy*B.s*B.sy,a:A.a*B.a}}
+function render(t,still){
+ const p=P,T=theme(),L=lay(),hasTab=p.label.trim()!=='',e=36;
+ let x0=Math.min(0,hasTab?L.tx:0),x1=Math.max(L.bw+Math.max(0,p.shx),hasTab?L.tx+L.tw:0),y0=Math.min(0,hasTab?L.ty:0),y1=L.bh+Math.max(0,p.shy);
+ x0-=e+Math.max(0,-p.shx);y0-=e+Math.max(0,-p.shy);x1+=e;y1+=e;
+ let W,H,ox,oy;
+ if(p.res==='Auto fit'){W=Math.ceil(x1-x0+2*p.mg);H=Math.ceil(y1-y0+2*p.mg);ox=W/2-(x0+x1)/2;oy=H/2-(y0+y1)/2;if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H}}
+ else{W=cv.width;H=cv.height;ox=W*p.px/100-(x0+x1)/2;oy=H*p.py/100-(y0+y1)/2}
+ ctx.clearRect(0,0,W,H);if(!p.text&&!hasTab)return;
+ const fy=still?0:-p.float*Math.sin(TAU*p.pcy*t/p.dur),cxl=(x0+x1)/2,cyl=(y0+y1)/2;
+ ctx.save();ctx.translate(ox,oy+fy);ctx.translate(cxl,cyl);ctx.rotate(p.tilt*rad);ctx.translate(-cxl,-cyl);
+ const part=(k,cx,cy,fn)=>{const q=still?null:partX(k,t);if(q&&(q.sx*q.sy<1e-4||q.a<.001))return;ctx.save();if(q){ctx.globalAlpha=q.a;ctx.translate(cx+q.dx,cy+q.dy);ctx.rotate(q.r);ctx.scale(q.sx,q.sy);ctx.translate(-cx,-cy)}fn();ctx.restore()};
+ part(1,L.bw/2,L.bh/2,()=>drawBox(L,T,t,still));
+ if(hasTab)part(0,L.tx+L.tw/2,L.ty+L.th/2,()=>drawTab(L,T));
+ ctx.restore()}
+let playing=true,t0=performance.now(),tp=0,busy=false;
+function loop(now){if(!busy){if(playing)tp=((now-t0)/1000)%P.dur;render(tp)}requestAnimationFrame(loop)}
+$('#pp').onclick=e=>{playing=!playing;if(playing)t0=performance.now()-tp*1000;e.target.textContent=playing?'Pause':'Play'};
+
+const CT=(()=>{const t=[];for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+const crc=d=>{let c=-1;for(let i=0;i<d.length;i++)c=CT[(c^d[i])&255]^(c>>>8);return(~c)>>>0};
+function zip(fs){const parts=[],cd=[],enc=new TextEncoder();let off=0;
+ fs.forEach(f=>{const nm=enc.encode(f.n),c=crc(f.d),n=f.d.length,h=new DataView(new ArrayBuffer(30));
+  h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint32(14,c,true);h.setUint32(18,n,true);h.setUint32(22,n,true);h.setUint16(26,nm.length,true);
+  parts.push(h.buffer,nm,f.d);
+  const e=new DataView(new ArrayBuffer(46));e.setUint32(0,0x02014b50,true);e.setUint16(4,20,true);e.setUint16(6,20,true);e.setUint32(16,c,true);e.setUint32(20,n,true);e.setUint32(24,n,true);e.setUint16(28,nm.length,true);e.setUint32(42,off,true);
+  cd.push(e.buffer,nm);off+=30+nm.length+n});
+ const cs=cd.reduce((a,b)=>a+b.byteLength,0),en=new DataView(new ArrayBuffer(22));
+ en.setUint32(0,0x06054b50,true);en.setUint16(8,fs.length,true);en.setUint16(10,fs.length,true);en.setUint32(12,cs,true);en.setUint32(16,off,true);
+ return new Blob([...parts,...cd,en.buffer],{type:'application/zip'})}
+
+let DL=null;const msg=m=>$('#msg').textContent=m,btn=v=>['#bs','#bb','#bw','#bm','#bp','#bg'].forEach(s=>$(s).disabled=v);
+async function run(fn){if(busy)return;busy=true;btn(true);
+ try{await document.fonts.load(`${P.size}px "${P.font}"`,P.text);await fn();}
+ catch(e){msg(e&&e.code==='declined'?'Cancelled.':'Export failed: '+(e.message||e.code||e))}
+ busy=false;btn(false)}
+$('#bp').onclick=()=>run(async()=>{
+ const n=Math.round(P.dur*P.fps),fs=[];
+ for(let f=0;f<n;f++){render(f/P.fps);const b=await new Promise(r=>cv.toBlob(r,'image/png'));
+  fs.push({n:`frame_${String(f+1).padStart(4,'0')}.png`,d:new Uint8Array(await b.arrayBuffer())});msg(`Render ${f+1}/${n}`)}
+ await DL.save({filename:'chat-frames.zip',data:zip(fs)});msg('PNG sequence saved.')});
+$('#bw').onclick=()=>run(async()=>{
+ const n=Math.round(P.dur*P.fps),st=cv.captureStream(0),tk=st.getVideoTracks()[0];
+ const mt=['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'].find(m=>MediaRecorder.isTypeSupported(m));
+ const rec=new MediaRecorder(st,{mimeType:mt,videoBitsPerSecond:12e6}),chunks=[];
+ rec.ondataavailable=e=>e.data.size&&chunks.push(e.data);
+ const done=new Promise(r=>rec.onstop=r);rec.start();
+ for(let f=0;f<n;f++){render(f/P.fps);tk.requestFrame();msg(`Render ${f+1}/${n}`);await new Promise(r=>setTimeout(r,1000/P.fps))}
+ rec.stop();await done;
+ await DL.save({filename:'chat.webm',data:new Blob(chunks,{type:'video/webm'})});msg('WebM saved.')});
+
+function quant(h){
+ const cols=[];for(let c=0;c<32768;c++)if(h[c])cols.push(c);
+ const ch=(c,k)=>k?k===1?(c>>5)&31:c&31:c>>10;let bx=[cols];
+ while(bx.length<255){let bi=-1,bs=0,bk=0;
+  bx.forEach((b,i)=>{if(b.length<2)return;let be=-1,kk=0,cnt=0;for(let k=0;k<3;k++){let mn=31,mx=0;for(const c of b){const v=ch(c,k);if(v<mn)mn=v;if(v>mx)mx=v}if(mx-mn>be){be=mx-mn;kk=k}}
+   for(const c of b)cnt+=h[c];const s=cnt*(be+1);if(s>bs){bs=s;bi=i;bk=kk}});
+  if(bi<0)break;
+  const b=bx[bi].sort((x,y)=>ch(x,bk)-ch(y,bk));let tot=0;for(const c of b)tot+=h[c];let a=0,m=0;for(;m<b.length-2;m++){a+=h[b[m]];if(a>=tot/2)break}
+  bx.splice(bi,1,b.slice(0,m+1),b.slice(m+1))}
+ const pal=new Array(768).fill(0),map=new Uint8Array(32768);
+ bx.forEach((b,i)=>{let r=0,g=0,bl=0,t=0;for(const c of b){const n=h[c];r+=(c>>10)*n;g+=((c>>5)&31)*n;bl+=(c&31)*n;t+=n;map[c]=i+1}
+  if(t){const e=v=>Math.min(255,Math.round(v/t*8+4));pal[(i+1)*3]=e(r);pal[(i+1)*3+1]=e(g);pal[(i+1)*3+2]=e(bl)}});
+ return{pal,map}}
+function lzw(px){const cl=256,eoi=257;let sz=9,nx=258,cur=0,bits=0;const dict=new Map(),out=[];
+ const put=c=>{cur|=c<<bits;bits+=sz;while(bits>=8){out.push(cur&255);cur>>>=8;bits-=8}};
+ put(cl);let pre=px[0];
+ for(let i=1;i<px.length;i++){const k=px[i],key=pre*256+k,v=dict.get(key);
+  if(v!==undefined)pre=v;else{put(pre);if(nx<4096){dict.set(key,nx++);if(nx>(1<<sz)&&sz<12)sz++}else{put(cl);dict.clear();sz=9;nx=258}pre=k}}
+ put(pre);put(eoi);if(bits>0)out.push(cur&255);
+ const r=[];for(let i=0;i<out.length;i+=255){const c=out.slice(i,i+255);r.push(new Uint8Array([c.length,...c]))}return r}
+$('#bg').onclick=()=>run(async()=>{
+ const n=Math.round(P.dur*P.gfps),w=P.gw,h=Math.round(cv.height*w/cv.width),g=document.createElement('canvas');g.width=w;g.height=h;
+ const gx=g.getContext('2d',{willReadFrequently:true});gx.imageSmoothingQuality='high';
+ const frs=[],hist=new Uint32Array(32768);
+ for(let f=0;f<n;f++){render(f/P.gfps);gx.clearRect(0,0,w,h);gx.drawImage(cv,0,0,w,h);const d=gx.getImageData(0,0,w,h).data;
+  for(let i=0;i<d.length;i+=4)if(d[i+3]>=128)hist[(d[i]>>3)<<10|(d[i+1]>>3)<<5|d[i+2]>>3]++;
+  frs.push(d);msg(`Render ${f+1}/${n}`);if(f%4===3)await new Promise(r=>setTimeout(r))}
+ msg('Building palette...');await new Promise(r=>setTimeout(r));
+ const{pal,map}=quant(hist),B=[],u16=v=>[v&255,v>>8],dl=Math.max(2,Math.round(100/P.gfps));
+ B.push(new Uint8Array([71,73,70,56,57,97,...u16(w),...u16(h),0xF7,0,0,...pal,33,255,11,...[...'NETSCAPE2.0'].map(c=>c.charCodeAt(0)),3,1,0,0,0]));
+ for(let f=0;f<n;f++){const d=frs[f],ix=new Uint8Array(w*h);
+  for(let i=0,j=0;i<d.length;i+=4,j++)ix[j]=d[i+3]<128?0:map[(d[i]>>3)<<10|(d[i+1]>>3)<<5|d[i+2]>>3];
+  B.push(new Uint8Array([33,249,4,9,...u16(dl),0,0,44,0,0,0,0,...u16(w),...u16(h),0,8]),...lzw(ix),new Uint8Array([0]));
+  msg(`Encode ${f+1}/${n}`);if(f%4===3)await new Promise(r=>setTimeout(r))}
+ B.push(new Uint8Array([59]));
+ await DL.save({filename:'chat.gif',data:new Blob(B,{type:'image/gif'})});msg('GIF saved.')});
+
+const mp4=(id,name)=>{$(id).onclick=()=>run(async()=>{
+ if(!window.VideoEncoder||!window.Mp4Muxer)throw new Error('MP4 export needs a recent Chrome or Edge over HTTPS. Use the PNG sequence instead.');
+ const col={'Green screen':'#00ff00','Blue screen':'#0000ff','Black screen':'#000000'}[P.mbg],W=cv.width,H=cv.height,n=Math.round(P.dur*P.fps);
+ const cfg={codec:'avc1.64002A',width:W,height:H,bitrate:16e6,framerate:P.fps};
+ if(!(await VideoEncoder.isConfigSupported(cfg)).supported)throw new Error('This browser cannot encode H.264 at this size.');
+ const mx=new Mp4Muxer.Muxer({target:new Mp4Muxer.ArrayBufferTarget(),video:{codec:'avc',width:W,height:H},fastStart:'in-memory'});
+ let err=null;const enc=new VideoEncoder({output:(c,m)=>mx.addVideoChunk(c,m),error:e=>err=e});enc.configure(cfg);
+ const oc=document.createElement('canvas');oc.width=W;oc.height=H;const ox=oc.getContext('2d');
+ for(let f=0;f<n;f++){render(f/P.fps);ox.fillStyle=col;ox.fillRect(0,0,W,H);ox.drawImage(cv,0,0);
+  const fr=new VideoFrame(oc,{timestamp:Math.round(f*1e6/P.fps),duration:Math.round(1e6/P.fps)});enc.encode(fr,{keyFrame:f%P.fps===0});fr.close();
+  if(err)throw err;while(enc.encodeQueueSize>8)await new Promise(r=>setTimeout(r,5));
+  msg(`Encode ${f+1}/${n}`);if(f%5===4)await new Promise(r=>setTimeout(r))}
+ await enc.flush();if(err)throw err;mx.finalize();
+ await DL.save({filename:name,data:new Blob([mx.target.buffer],{type:'video/mp4'})});msg('MP4 saved.')})};
+mp4('#bm','chat.mp4');
+$('#bs').onclick=()=>run(async()=>{render(0,true);const b=await new Promise(r=>cv.toBlob(r,'image/png'));await DL.save({filename:'chat.png',data:b});msg('PNG saved.')});
+$('#bb').onclick=()=>run(async()=>{
+ const rows=P.batch.split('\n').map(l=>l.trim()).filter(Boolean);if(!rows.length)throw new Error('Add lines to the Batch list first.');
+ const keep=[P.label,P.text],fs=[];
+ try{for(let i=0;i<rows.length;i++){const r=rows[i],k=r.indexOf('|');P.label=k>0?r.slice(0,k).trim():keep[0];P.text=(k>0?r.slice(k+1):r).trim();render(0,true);
+  const b=await new Promise(rs=>cv.toBlob(rs,'image/png')),slug=P.text.replace(/[^A-Za-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,24)||'chat';
+  fs.push({n:`${String(i+1).padStart(2,'0')}-${slug}.png`,d:new Uint8Array(await b.arrayBuffer())});msg(`Render ${i+1}/${rows.length}`)}}
+ finally{[P.label,P.text]=keep}
+ await DL.save({filename:'chats.zip',data:zip(fs)});msg('ZIP saved.')});
+build();swatches();$('#fl').replaceChildren(...FONTS.map(f=>new Option(f,f)));requestAnimationFrame(loop);
+const FB={save:async({filename,data})=>{const b=data instanceof Blob?data:new Blob([data]),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),5000);return{status:'saved'}}};
+const useFB=()=>{DL=FB;btn(false)};
+if(window.claude&&claude.use){claude.use('downloads').then(d=>{if(d){DL=d;btn(false)}else useFB()}).catch(useFB)}
+else useFB();
+</script>
+</body>
+</html>
