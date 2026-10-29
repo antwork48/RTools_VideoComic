@@ -8,10 +8,14 @@ const ICON={
  bg:'<svg viewBox="0 0 48 48" fill="currentColor" stroke="currentColor" stroke-linecap="round"><circle cx="9" cy="9" r="1.5" stroke="none"/><circle cx="19" cy="9" r="2.5" stroke="none"/><circle cx="29" cy="9" r="3.5" stroke="none"/><circle cx="39" cy="9" r="4.5" stroke="none"/><circle cx="9" cy="21" r="1" stroke="none"/><circle cx="19" cy="21" r="1.5" stroke="none"/><circle cx="29" cy="21" r="2.5" stroke="none"/><circle cx="39" cy="21" r="3.5" stroke="none"/><path d="M6 33h20M6 39h30M6 45h14" stroke-width="3.5" fill="none"/></svg>',
  comic:'<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"><path d="'+star+'"/><path d="M24 16.5v8M24 30v.5" stroke-linecap="round" stroke-width="3.5"/></svg>'
 };
+ICON.crop='<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 6v28h28M6 14h28v28"/></svg>';
+ICON.bubble='<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"><path d="M24 8C14 8 6 14 6 22c0 4 2 7.500 5.500 10L10 41l8.500-5c1.800.4 3.600.6 5.500.6 10 0 18-6.200 18-14.200S34 8 24 8z"/><path d="M16.500 22h.1M24 22h.1M31.500 22h.1" stroke-width="4"/></svg>';
 window.RTOOLS={X,brand:'RTools Comic',tools:[
  {name:'SFX Animator',dir:'sfx_animator',icon:ICON.sfx,desc:'Animated onomatopoeia text, JJBA style. Curves, gradients, strokes, wiggle, shake, and textures.',tag:'Exports WebM, MP4, PNG sequence, GIF'},
+ {name:'Comic SFX Maker',dir:'comic_sfx',icon:ICON.comic,desc:'American comic sound effects: POW and BAM text over Ben-Day dot bursts with extruded 3D lettering.',tag:'Exports PNG, PNG sequence, WebM, MP4, GIF'},
+ {name:'Comic Bubble Maker',dir:'bubble',icon:ICON.bubble,desc:'Animated comic speech bubbles: speech, thought, shout, whisper, and more, with halftone shading and typewriter text.',tag:'Exports PNG, PNG sequence, WebM, MP4, GIF'},
  {name:'Anime BG Maker',dir:'bg_anime',icon:ICON.bg,desc:'Anime-style backgrounds: halftone, speed lines, focus lines, and rays. Supports looping animation and transparent output.',tag:'Exports PNG, PNG sequence, WebM, MP4'},
- {name:'Comic SFX Maker',dir:'comic_sfx',icon:ICON.comic,desc:'American comic sound effects: POW and BAM text over Ben-Day dot bursts with extruded 3D lettering.',tag:'Exports PNG, PNG sequence, WebM, MP4, GIF'}
+ {name:'Image Cropper',dir:'crop',icon:ICON.crop,desc:'Crop pasted screenshots to an exact pixel size, add a frame and shadow, and export static PNG or an animated clip.',tag:'Exports PNG, ZIP, WebM, MP4, GIF'}
 ]};
 class RtNav extends HTMLElement{
  connectedCallback(){
