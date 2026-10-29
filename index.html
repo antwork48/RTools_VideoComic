@@ -3,294 +3,48 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Battle UI Maker – RTools Comic</title>
+<title>RTools Comic</title>
+<meta name="description" content="Web tools for video editing: RTools Comic.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%238b5cf6'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='Arial' font-weight='800' font-size='20' fill='%23fff'%3ER%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Black+Han+Sans&family=Dela+Gothic+One&family=Manrope:wght@400;600;800&family=Oswald:wght@500;700&family=Rubik+Mono+One&family=Teko:wght@500;700&display=swap" rel="stylesheet">
-<script src="../nav.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+<script src="nav.js"></script>
 <style>
-:root{--bg:#0e0b14;--panel:#171222;--line:#2a2238;--text:#ece8f5;--mut:#9a90b0;--acc:#8b5cf6;--acc2:#c4b5fd;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-html{scroll-padding-top:env(safe-area-inset-top,0px);background:var(--bg)}
+:root{--bg:#0e0b14;--panel:#171222;--line:#2a2238;--text:#ece8f5;--mut:#9a90b0;--acc:#8b5cf6;--acc2:#c4b5fd;--hot:#fb923c;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 *,*::before,*::after{box-sizing:inherit}
-body{margin:0;background:var(--bg);color:var(--text);font:400 15px/1.45 Manrope,system-ui,sans-serif;min-height:100%}
-body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
-header{display:flex;align-items:baseline;gap:12px;padding:16px 16px 8px;max-width:1200px;margin:0 auto}
-h1{margin:0;font:800 22px/1 Manrope,sans-serif;letter-spacing:-.01em}
-.by{color:var(--acc2);font-weight:600;font-size:14px}
-main{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(300px,1fr);gap:16px;padding:8px 16px 32px;max-width:1200px;margin:0 auto;align-items:start}
-.stage{position:sticky;top:calc(env(safe-area-inset-top,0px) + var(--nav-h,0px));z-index:5;background:var(--bg);padding-bottom:4px}
-canvas{display:block;width:100%;max-height:60vh;object-fit:contain;border-radius:10px;border:1px solid var(--line);background:conic-gradient(#1b1526 25%,#241c33 0 50%,#1b1526 0 75%,#241c33 0) 0 0/20px 20px}
-.bar{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;align-items:center}
-button{font:600 14px Manrope,sans-serif;color:var(--text);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:9px 14px;cursor:pointer}
-button:hover{border-color:var(--acc)}
-button.go{background:var(--acc);border-color:var(--acc);color:#fff}
-button.go:hover{background:#7c3aed}
-button:disabled{opacity:.45;cursor:not-allowed}
-:focus-visible{outline:2px solid var(--acc2);outline-offset:2px}
-#msg{color:var(--mut);font-size:13px;min-height:1.4em;margin-top:6px}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:6px 14px 10px}
-.pre{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
-.pre button{padding:6px 11px;font-size:13px}
-details{border-top:1px solid var(--line);padding:4px 0}
-details:first-of-type{border-top:0}
-summary{cursor:pointer;font-weight:800;padding:8px 0;color:var(--acc2)}
-label{display:grid;grid-template-columns:1fr minmax(0,1.3fr) 40px;gap:8px;align-items:center;padding:4px 0;font-size:13px;color:var(--mut)}
-label>*:nth-child(2){grid-column:2}
-output{text-align:right;font-variant-numeric:tabular-nums;color:var(--text);font-size:12px}
-input[type=text],select{width:100%;grid-column:2/4;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:7px 8px;font:inherit}
-input[type=range]{width:100%;accent-color:var(--acc)}
-input[type=color]{width:100%;height:30px;background:none;border:1px solid var(--line);border-radius:6px;padding:2px;grid-column:2/4}
-input[type=file]{grid-column:2/4;font-size:12px;color:var(--mut);max-width:100%}
-.note{font-size:12px;color:var(--mut);margin:6px 0 0}
-@media(max-width:820px){main{grid-template-columns:1fr}canvas{max-height:34vh}}
-textarea{width:100%;grid-column:2/4;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:7px 8px;font:inherit;resize:vertical}
-.sw{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}
-.sw button{width:26px;height:26px;border-radius:50%;padding:0;border:2px solid var(--line)}
-.sw button:hover{border-color:#fb923c}
+html{background:var(--bg)}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);font:400 16px/1.5 Manrope,system-ui,sans-serif;position:relative;overflow-x:hidden}
+body::before{content:"";position:absolute;inset:0 0 auto 0;height:360px;background:radial-gradient(circle,rgba(139,92,246,.45) 1.6px,transparent 2.2px) 0 0/18px 18px;-webkit-mask-image:linear-gradient(200deg,#000 0%,transparent 55%);mask-image:linear-gradient(200deg,#000 0%,transparent 55%);pointer-events:none}
+main{position:relative;max-width:1080px;margin:0 auto;padding:56px 20px 40px}
+h1{margin:0;font:800 clamp(34px,8vw,52px)/1.05 Manrope,sans-serif;letter-spacing:-.02em}
+.sub{margin:14px 0 40px;color:var(--mut);max-width:46ch}
+ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+a.tool{display:flex;flex-direction:column;gap:14px;height:100%;padding:20px;background:var(--panel);border:1px solid var(--line);border-radius:14px;color:inherit;text-decoration:none;transition:border-color .15s,transform .15s}
+a.tool:hover{border-color:var(--hot);transform:translateY(-4px)}
+a.tool>span:nth-child(2){flex:1}
+a.tool:focus-visible{outline:2px solid var(--hot);outline-offset:3px}
+.ico{width:56px;height:56px;display:grid;place-items:center;border-radius:12px;background:#221a33;color:var(--acc2)}
+.ico svg{width:34px;height:34px}
+h2{margin:0 0 2px;font:800 19px/1.2 Manrope,sans-serif}
+p{margin:0;color:var(--mut);font-size:14px}
+.tag{display:inline-block;margin-top:8px;font-size:12px;font-weight:600;color:var(--hot)}
+.go{color:var(--hot);width:24px;height:24px;align-self:flex-end}
+footer{margin-top:48px;color:var(--mut);font-size:13px}
+@media(max-width:900px){ul{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){main{padding-top:36px}ul{grid-template-columns:1fr;gap:12px}a.tool{flex-direction:row;align-items:center;padding:14px}.ico{width:48px;height:48px;flex:none}.go{display:none}}
+@media(prefers-reduced-motion:reduce){a.tool{transition:none}a.tool:hover{transform:none}}
 </style>
 </head>
 <body>
-<header><h1>Battle UI Maker</h1></header>
 <main>
-<section class="stage">
-  <canvas id="cv" width="1280" height="720"></canvas>
-  <div class="bar">
-    <button id="pp">Pause</button>
-    <button id="bs" class="go" disabled>Export PNG</button>
-    <button id="bw" class="go" disabled>Export WebM</button>
-    <button id="bm" class="go" disabled>Export MP4 (green/blue/black)</button>
-    <button id="bp" class="go" disabled>Export PNG sequence (.zip)</button>
-    <button id="bg" class="go" disabled>Export GIF</button>
-  </div>
-  <div id="msg"></div>
-</section>
-<section class="panel">
-  <div class="pre" id="pre"></div>
-  <div id="ui"></div><datalist id="fl"></datalist>
-  <p class="note">Pick a mode: command menu, dialogue box, or both. Put one command per line (and one help line per command in the same order). With Auto cycle on, the highlight steps through the commands, so set Duration to about commands x hold time for a clean loop. Layout is designed at 1920x1080 and scales to other sizes. Exports are transparent; MP4 fills the background with the chosen screen color for keying. GIF supports only 256 colors and on/off transparency. This is an original, inspired-by style and uses no game assets.</p>
-</section>
+  <h1>RTools Comic</h1>
+  <p class="sub">Web tools for video editing. They run right in your browser, no install needed.</p>
+  <ul id="list"></ul>
+  <footer>RTools Comic</footer>
 </main>
-<script src="https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.3/build/mp4-muxer.js"></script>
 <script>
-const $=s=>document.querySelector(s);
-const cv=$('#cv'),ctx=cv.getContext('2d'),fc=document.createElement('canvas');
-const TAU=Math.PI*2,rad=Math.PI/180;
-const FONTS=['Anton','Bebas Neue','Oswald','Dela Gothic One','Rubik Mono One','Black Han Sans','Teko'];
-const ANIMS=['none','fade','pop','slam','drop','slide','rise','spin','stretch','scatter'];
-const PAL=[['Red','#e5171f'],['Crimson','#c2185b'],['Orange','#ff7a1a'],['Yellow','#ffd400'],['Green','#22c55e'],['Cyan','#1ec8e6'],['Blue','#2b6bff'],['Violet','#8b5cf6'],['Pink','#ff4fa3'],['White','#f2f2f2']];
-const P={mode:'both',font:'Anton',bold:'off',base:'#e5171f',tm:'dark',slant:.18,shake:2,
- cmds:'ATTACK\nSKILL\nITEM\nGUARD\nTACTICS\nESCAPE',help:'Strike the enemy with your weapon.\nUnleash a powerful special skill.\nUse a recovery or support item.\nBrace for the incoming attack.\nChange the party strategy.\nRun away from this battle.',
- sel:0,cycle:'on',hold:1,isize:50,ih:78,igap:12,sk:24,jag:7,ss:1.3,stairs:18,mx:90,my:100,hb:'on',
- name:'Joker',line:'Time to take their hearts. Are you ready?',dsize:44,dw:1100,dpad:44,side:'left',tw:28,ind:'on',
- ain:'slide',aout:'slide',pop:1,popd:.35,outd:.3,stag:.06,
- res:'1920x1080',dur:6,fps:30,gw:480,gfps:20,mbg:'Green screen'};
-const DEF={...P};
-const PRE={
- 'Menu + dialogue':{},
- 'Menu only':{mode:'menu'},
- 'Dialogue only':{mode:'dialogue',cycle:'off'},
- 'Light theme':{tm:'light'},
- 'Blue':{base:'#2b6bff'},
- 'Yellow':{base:'#ffd400'},
- 'Quick pop':{ain:'pop',aout:'fade',stag:.04,popd:.25}
-};
-const S=[
-['General',[['mode','Mode','s',['both','menu','dialogue']],['font','Font (type an installed font name)','x'],['bold','Bold','s',['off','on']],['base','Theme color','c'],['tm','Panels','s',['dark','light']],['slant','Text slant',0,.4,.01],['shake','Shake',0,20,.5]]],
-['Command menu',[['cmds','Commands (one per line)','m'],['help','Help text (one per command)','m'],['sel','Selected command (when cycle off)',0,9,1],['cycle','Auto cycle highlight','s',['on','off']],['hold','Hold per command (s)',.3,3,.1],['isize','Text size',20,90,1],['ih','Item height',40,140,1],['igap','Gap',0,40,1],['sk','Slant of plates',0,60,1],['jag','Jagged edge',0,20,.5],['ss','Selected scale',1,1.8,.05],['stairs','Stair offset',0,50,1],['hb','Help box','s',['on','off']],['mx','Margin X',0,400,1],['my','Margin bottom',0,400,1]]],
-['Dialogue',[['name','Speaker name','t'],['line','Dialogue text','m'],['dsize','Text size',20,90,1],['dw','Box width',500,1700,10],['dpad','Padding',10,100,1],['side','Name plate side','s',['left','right']],['tw','Typewriter (chars/sec, 0 = off)',0,80,1],['ind','Next indicator','s',['on','off']]]],
-['Motion',[['ain','Animation in','s',ANIMS],['aout','Animation out','s',ANIMS],['pop','Strength',0,1.5,.05],['popd','In duration (s)',.1,1.5,.05],['outd','Out duration (s)',.1,1.5,.05],['stag','Stagger (s)',0,.3,.01]]],
-['Canvas and export',[['res','Canvas','s',['1920x1080','1280x720','1080x1920','1080x1080']],['dur','Duration (s)',1,20,.5],['fps','FPS','s',[24,30,60]],['gw','GIF width (px)','s',[320,480,640,800,1000]],['gfps','GIF FPS','s',[12,15,20,25,30]],['mbg','MP4 background','s',['Green screen','Blue screen','Black screen']]]]
-];
-function swatches(){const box=document.createElement('div');box.className='sw';PAL.forEach(([n,c])=>{const b=document.createElement('button');b.style.background=c;b.title=n;b.setAttribute('aria-label',n);b.onclick=()=>{P.base=c;sync()};box.append(b)});const g=document.querySelectorAll('#ui details')[0];g.insertBefore(box,g.children[1])}
-let TEX=null;const ctl={};
-function setRes(){const m=/(\d+)x(\d+)/.exec(P.res);if(m){cv.width=+m[1];cv.height=+m[2]}}
-function build(){
- S.forEach(([g,items],gi)=>{
-  const d=document.createElement('details');d.open=gi<4;d.innerHTML=`<summary>${g}</summary>`;
-  items.forEach(([k,l,a,b,c])=>{
-   const row=document.createElement('label');row.innerHTML=`<span>${l}</span>`;let el;
-   if(a==='t'){el=document.createElement('input');el.type='text'}
-   else if(a==='m'){el=document.createElement('textarea');el.rows=4}
-   else if(a==='c'){el=document.createElement('input');el.type='color'}
-   else if(a==='x'){el=document.createElement('input');el.type='text';el.setAttribute('list','fl');const clr=()=>{if(el.value){el.dataset.p=el.value;el.placeholder=el.value;el.value=''}};el.onfocus=el.onmousedown=clr;el.onblur=()=>{if(!el.value&&el.dataset.p)el.value=el.dataset.p}}
-   else if(a==='s'){el=document.createElement('select');b.forEach(o=>el.add(new Option(o,o)))}
-   else if(a==='f'){el=document.createElement('input');el.type='file';el.accept='image/*';
-    el.onchange=()=>{const f=el.files[0];if(!f){TEX=null;return}const im=new Image();im.onload=()=>TEX=im;im.src=URL.createObjectURL(f)};
-    row.append(el);d.append(row);return}
-   else{el=document.createElement('input');el.type='range';el.min=a;el.max=b;el.step=c;const o=document.createElement('output');el.out=o}
-   el.oninput=()=>{P[k]=typeof DEF[k]==='number'?+el.value:el.value;if(el.out)el.out.textContent=el.value;if(k==='res')setRes();if(k==='font'||k==='text')loadFonts()};
-   ctl[k]=el;row.append(el);if(el.out)row.append(el.out);d.append(row)});
-  if(gi===0){const b=document.createElement('button');b.textContent='Load fonts from this PC';b.onclick=loadLocal;const n=document.createElement('p');n.className='note';n.id='fnote';n.textContent='Type the font name exactly as installed on your PC, or load the list.';const fs=document.createElement('p');fs.className='note';fs.id='fstat';d.append(b,n,fs)}
-  $('#ui').append(d)});
- Object.keys(PRE).forEach(n=>{const b=document.createElement('button');b.textContent=n;b.onclick=()=>{Object.assign(P,DEF,{base:P.base,cmds:P.cmds,help:P.help,name:P.name,line:P.line},PRE[n]);sync()};$('#pre').append(b)});
- sync()}
-function sync(){for(const k in ctl){ctl[k].value=P[k];if(ctl[k].out)ctl[k].out.textContent=P[k]}setRes();loadFonts()}
-const hasFont=n=>{const g=document.createElement('canvas').getContext('2d'),t='mmmmmmmmmmlli WQ@';const w=f=>{g.font=`72px ${f}`;return g.measureText(t).width};return w(`"${n}",monospace`)!==w('monospace')||w(`"${n}",serif`)!==w('serif')};
-const loadFonts=()=>{const n=P.font.replace(/"/g,'');return document.fonts.load(`60px "${n}"`,P.text).catch(()=>{}).then(()=>{const e=$('#fstat');if(!e)return;e.textContent=hasFont(n)?'':`"${n}" was not found on this device, so a fallback font is shown. Check the exact name.`;e.style.color='#fb923c'})};
-async function loadLocal(){const n=$('#fnote');if(!window.queryLocalFonts){n.textContent='This browser does not support listing PC fonts (desktop Chrome or Edge does). Type the font name manually.';return}try{const l=await queryLocalFonts(),fam=[...new Set(l.map(f=>f.family))].sort();$('#fl').replaceChildren(...[...FONTS,...fam].map(f=>new Option(f,f)));n.textContent=`${fam.length} fonts loaded. Click the font field to choose.`}catch(e){n.textContent='Font access was denied or blocked here. Type the font name manually.'}}
-
-const rnd=n=>{const x=Math.sin(n*127.1+311.7)*43758.5453;return x-Math.floor(x)};
-const eob=q=>{const c=2.2,x=q-1;return 1+(c+1)*x*x*x+c*x*x};
-const clamp=q=>Math.max(0,Math.min(1,q)),eo=q=>1-(1-q)**3,vis=l=>l.sx*l.sy>1e-4&&l.a>.001,bnc=q=>{const n=7.5625,d=2.75;if(q<1/d)return n*q*q;if(q<2/d)return n*(q-=1.5/d)*q+.75;if(q<2.5/d)return n*(q-=2.25/d)*q+.9375;return n*(q-=2.625/d)*q+.984375};
-function AW(st,k,i,I,d){const o={s:1,sx:1,sy:1,dx:0,dy:0,r:0,a:1},c=clamp(k),T=Math.PI*2;
- switch(st){case'fade':o.a=1-c;break;case'pop':o.s=Math.max(0,1-k*I);break;case'slam':o.s=1+k*2.5*I;o.a=clamp(1-k*1.2);break;case'drop':o.dy=d*k*700*I;break;case'slide':o.dx=d*k*700*I;o.a=clamp(3*(1-k));break;case'rise':o.dy=-d*k*220*I;o.a=1-c;break;case'spin':o.r=d*k*T*I;o.s=1-c;break;case'stretch':o.sx=1+k*2*I;o.sy=1-c;o.a=clamp(2*(1-k));break;case'scatter':o.dx=(rnd(i*3+1)-.5)*1400*k*I;o.dy=(rnd(i*3+2)-.5)*900*k*I;o.r=(rnd(i*3+3)-.5)*3*k*I;o.a=1-c}
- return o}
-
-function hexHsl(h){const n=parseInt(h.slice(1),16),r=(n>>16&255)/255,g=(n>>8&255)/255,b=(n&255)/255,mx=Math.max(r,g,b),mn=Math.min(r,g,b),l=(mx+mn)/2,d=mx-mn;let hh=0,s=0;if(d){s=d/(1-Math.abs(2*l-1));hh=mx===r?((g-b)/d+6)%6:mx===g?(b-r)/d+2:(r-g)/d+4;hh*=60}return[Math.round(hh),Math.round(s*100),Math.round(l*100)]}
-function theme(){const[h,s,l]=hexHsl(P.base),dk=P.tm==='dark',nn=parseInt(P.base.slice(1),16),yl=.299*(nn>>16&255)+.587*(nn>>8&255)+.114*(nn&255);return{main:P.base,shade:`hsl(${h},${s}%,${Math.max(12,l-22)}%)`,lab:yl>150?'#0a0a0c':'#ffffff',labO:yl>150?'#ffffff':'#0a0a0c',ink:dk?'#0a0a0c':'#f6f6f6',inkT:dk?'#ffffff':'#0a0a0c',oc:dk?'#ffffff':'#0a0a0c'}}
-const poly=pts=>{const p=new Path2D();pts.forEach(([x,y],i)=>i?p.lineTo(x,y):p.moveTo(x,y));p.closePath();return p};
-function slab(x,y,w,h,sk,j,seed){const r=k=>(rnd(seed*13+k)-.5)*2*j,L=w-sk,m=[.34,.68];
- return[[x+sk+r(1),y+r(2)],[x+sk+L*m[0]+r(3),y+r(4)],[x+sk+L*m[1]+r(5),y+r(6)],[x+w+r(7),y+r(8)],[x+w-sk+r(9),y+h+r(10)],[x+w-sk-L*m[0]+r(11),y+h+r(12)],[x+w-sk-L*m[1]+r(13),y+h+r(14)],[x+r(15),y+h+r(16)]]}
-function plate(pts,fill,outline,ow,so){const pa=poly(pts);ctx.save();ctx.translate(so,so);ctx.fillStyle='rgba(0,0,0,.55)';ctx.fill(pa);ctx.restore();
- if(ow>0){ctx.lineJoin='miter';ctx.miterLimit=3;ctx.lineWidth=ow*2;ctx.strokeStyle=outline;ctx.stroke(pa)}ctx.fillStyle=fill;ctx.fill(pa);return pa}
-const fontStr=sz=>`${P.bold==='on'?'bold ':''}${sz}px "${P.font.replace(/"/g,'')}",Impact,sans-serif`;
-function stext(txt,x,y,sz,fill,stroke,sw,al){ctx.save();ctx.translate(x,y);ctx.transform(1,0,-P.slant,1,0,0);ctx.font=fontStr(sz);ctx.textAlign=al||'left';ctx.textBaseline='middle';ctx.lineJoin='round';if(sw>0){ctx.strokeStyle=stroke;ctx.lineWidth=sw*2;ctx.strokeText(txt,0,0)}ctx.fillStyle=fill;ctx.fillText(txt,0,0);ctx.restore()}
-function icon(name,cx,cy,s,col){ctx.save();ctx.translate(cx,cy);ctx.fillStyle=ctx.strokeStyle=col;ctx.lineWidth=s*.13;ctx.lineCap='round';ctx.lineJoin='round';const n=name.toLowerCase();
- if(/atk|attack|fight|slash|strike/.test(n)){[-.3,0,.3].forEach(o=>{ctx.beginPath();ctx.moveTo(-s*.4+o*s,s*.5);ctx.lineTo(s*.25+o*s,-s*.5);ctx.stroke()})}
- else if(/guard|def|shield|block/.test(n)){ctx.beginPath();ctx.moveTo(0,-s*.55);ctx.lineTo(s*.45,-s*.3);ctx.lineTo(s*.35,s*.25);ctx.lineTo(0,s*.58);ctx.lineTo(-s*.35,s*.25);ctx.lineTo(-s*.45,-s*.3);ctx.closePath();ctx.fill()}
- else if(/item|bag|use|potion/.test(n)){ctx.beginPath();ctx.moveTo(0,-s*.55);ctx.lineTo(s*.45,0);ctx.lineTo(0,s*.55);ctx.lineTo(-s*.45,0);ctx.closePath();ctx.fill()}
- else if(/tactic|order|plan|team/.test(n)){ctx.beginPath();ctx.moveTo(-s*.5,0);ctx.lineTo(s*.5,0);ctx.moveTo(0,-s*.5);ctx.lineTo(0,s*.5);ctx.stroke();ctx.beginPath();ctx.arc(0,0,s*.18,0,TAU);ctx.fill()}
- else if(/escape|run|flee|retreat/.test(n)){ctx.beginPath();ctx.moveTo(-s*.5,0);ctx.lineTo(s*.35,0);ctx.stroke();ctx.beginPath();ctx.moveTo(s*.55,0);ctx.lineTo(s*.1,-s*.35);ctx.lineTo(s*.1,s*.35);ctx.closePath();ctx.fill()}
- else{ctx.beginPath();for(let k=0;k<10;k++){const a=k*Math.PI/5-Math.PI/2,r=k%2?s*.22:s*.55;k?ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r):ctx.moveTo(Math.cos(a)*r,Math.sin(a)*r)}ctx.closePath();ctx.fill()}
- ctx.restore()}
-function wrap(txt,maxw){const out=[];txt.split('\n').forEach(par=>{const sp=par.includes(' '),tk=sp?par.split(' '):[...par],sep=sp?' ':'';let cur='';tk.forEach(w=>{const t=cur?cur+sep+w:w;if(ctx.measureText(t).width>maxw&&cur){out.push(cur);cur=w}else cur=t});out.push(cur)});return out}
-function partX(k,t){const p=P,dd=k*p.stag,kq=clamp((t-dd)/p.popd),ki=1-(p.ain==='pop'?eob(kq):p.ain==='drop'?bnc(kq):eo(kq)),A=AW(p.ain,ki,k,p.pop,-1),B=AW(p.aout,Math.pow(clamp((t-(p.dur-p.outd-dd))/p.outd),2),k,p.pop,1);return{dx:A.dx+B.dx,dy:A.dy+B.dy,r:A.r+B.r,sx:A.s*A.sx*B.s*B.sx,sy:A.s*A.sy*B.s*B.sy,a:A.a*B.a}}
-let _t=0,_still=false;
-function part(k,cx,cy,fn){const q=_still?null:partX(k,_t);if(q&&(q.sx*q.sy<1e-4||q.a<.001))return;ctx.save();if(q){ctx.globalAlpha=q.a;ctx.translate(cx+q.dx,cy+q.dy);ctx.rotate(q.r);ctx.scale(q.sx,q.sy);ctx.translate(-cx,-cy)}fn();ctx.restore()}
-function drawMenu(T,t,still,LW,LH){
- const cmds=P.cmds.split('\n').map(s=>s.trim()).filter(Boolean),n=cmds.length;if(!n)return;
- const helps=P.help.split('\n');let sel=Math.min(P.sel,n-1),since=9;
- if(P.cycle==='on'&&!still){const q=t/P.hold;sel=Math.floor(q)%n;since=(q%1)*P.hold}
- const pop=still?1:.9+.1*eob(clamp(since/.2)),ih=P.ih,mxx=P.mx,hw=Math.min(P.mode==='both'?720:980,LW*.5),hsz=P.isize*.5;ctx.font=fontStr(hsz);const hl=helps.map(h=>wrap(h,hw-120)),hh=P.hb==='on'?Math.max(ih*1.05,Math.max(1,...hl.map(a=>a.length))*hsz*1.3+36):0;
- const ws=cmds.map((c,i)=>{ctx.font=fontStr(P.isize*(i===sel?P.ss:1));return Math.max(340,ctx.measureText(c).width+ih*1.5+60)*(i===sel?P.ss:1)});
- const total=n*(ih+P.igap)+(P.ss-1)*ih,y0=LH-P.my-total-(hh?hh+22:0),step=Math.floor(t*24);
- cmds.forEach((c,i)=>{
-  const isS=i===sel,h=ih*(isS?P.ss:1),w=ws[i],dist=Math.abs(i-sel),y=y0+i*(ih+P.igap)+(i>sel?(P.ss-1)*ih:0),lx=LW-mxx-w+(isS?0:P.stairs*Math.min(dist,3)),cx=lx+w/2,cy=y+h/2;
-  const ang=isS?-2.5*rad:(i%2?1.2:-1.2)*rad,jx=isS&&!still?(rnd(step*3+i)-.5)*2*P.shake:0,jy=isS&&!still?(rnd(step*5+i+9)-.5)*2*P.shake:0;
-  part(i,cx,cy,()=>{
-   ctx.translate(cx+jx,cy+jy);ctx.rotate(ang);if(isS)ctx.scale(pop,pop);ctx.translate(-cx,-cy);
-   plate(slab(lx,y,w,h,P.sk,P.jag,i+1),isS?T.main:T.ink,isS?'#ffffff':T.oc,isS?6:3,isS?10:6);
-   ctx.fillStyle=isS?T.shade:T.main;ctx.fill(poly(slab(lx+14,y+10,Math.max(14,h*.2),h-20,P.sk*.5,1.5,i+60)));
-   icon(c,lx+P.sk+h*.62,cy,h*.5,isS?T.lab:T.main);
-   stext(c,lx+P.sk+h*1.05,cy,P.isize*(isS?P.ss:1),isS?T.lab:T.inkT,T.labO,isS?4:0)});
- });
- if(hh){const hx=LW-mxx-hw,hy=LH-P.my-hh;
-  part(n,hx+hw/2,hy+hh/2,()=>{plate(slab(hx,hy,hw,hh,P.sk,P.jag*.8,77),T.ink,T.oc,3,7);ctx.fillStyle=T.main;ctx.fill(poly(slab(hx+10,hy+8,26,hh-16,P.sk*.4,1.5,78)));
-   const ls=hl[sel]||[];ls.forEach((ln,i)=>stext(ln,hx+P.sk+58,hy+hh/2+(i-(ls.length-1)/2)*hsz*1.3,hsz,T.inkT,'#000',0))})}}
-function drawDialog(T,t,still,LW,LH){
- const both=P.mode==='both',dw=Math.min(P.dw,both?LW*.5:LW-160),dp=P.dpad,sz=P.dsize;
- ctx.font=fontStr(sz);const lines=wrap(P.line,dw-2*dp-60),lh=sz*1.32,bh=lines.length*lh+2*dp,bx=both?P.mx:(LW-dw)/2,by=LH-P.my-bh;
- let left=P.tw>0&&!still?Math.floor(Math.max(0,t-P.popd-P.stag)*P.tw):1e9;
- part(0,bx+dw/2,by+bh/2,()=>{
-  plate(slab(bx,by,dw,bh,26,P.jag,90),T.ink,T.oc,3,10);
-  ctx.save();ctx.strokeStyle=T.inkT;ctx.globalAlpha*=.55;ctx.lineWidth=2;ctx.stroke(poly(slab(bx+16,by+12,dw-32,bh-24,20,1.5,91)));ctx.restore();
-  ctx.fillStyle=T.main;ctx.fill(poly([[bx+26,by],[bx+26+110,by],[bx+26+60,by+22]]));ctx.fill(poly([[bx+dw,by+bh],[bx+dw-120,by+bh],[bx+dw-70,by+bh-22]]));
-  lines.forEach((ln,i)=>{const s=ln.slice(0,Math.max(0,left));left-=ln.length;if(s)stext(s,bx+dp+36,by+dp+(i+.5)*lh,sz,T.inkT,'#000',0)});
-  if(P.ind==='on'){const bob=still?0:Math.sin(t*7)*5,ix=bx+dw-80,iy=by+bh-46+bob;ctx.fillStyle=T.main;ctx.fill(poly([[ix,iy],[ix+30,iy],[ix+15,iy+22]]))}});
- if(P.name.trim()){ctx.font=fontStr(sz*.95);const nw=ctx.measureText(P.name).width+110,nh=sz*1.55,nx=P.side==='right'?bx+dw-nw-50:bx+50,ny=by-nh*.62;
-  part(1,nx+nw/2,ny+nh/2,()=>{plate(slab(nx,ny,nw,nh,26,P.jag*.7,92),T.main,'#ffffff',5,9);stext(P.name,nx+nw/2-6,ny+nh/2,sz*.95,T.lab,T.labO,3,'center')})}}
-function render(t,still){
- const W=cv.width,H=cv.height,T=theme(),sc=W>=H?W/1920:W/1080,LW=W/sc,LH=H/sc;
- ctx.clearRect(0,0,W,H);_t=t;_still=!!still;
- const fr=Math.floor(t*P.fps+1e-6),gx=still?0:(rnd(fr*31+5)-.5)*2*P.shake*.5,gy=still?0:(rnd(fr*17+9)-.5)*2*P.shake*.5;
- ctx.save();ctx.scale(sc,sc);ctx.translate(gx,gy);
- if(P.mode!=='menu')drawDialog(T,t,still,LW,LH);
- if(P.mode!=='dialogue')drawMenu(T,t,still,LW,LH);
- ctx.restore()}
-let playing=true,t0=performance.now(),tp=0,busy=false;
-function loop(now){if(!busy){if(playing)tp=((now-t0)/1000)%P.dur;render(tp)}requestAnimationFrame(loop)}
-$('#pp').onclick=e=>{playing=!playing;if(playing)t0=performance.now()-tp*1000;e.target.textContent=playing?'Pause':'Play'};
-
-const CT=(()=>{const t=[];for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
-const crc=d=>{let c=-1;for(let i=0;i<d.length;i++)c=CT[(c^d[i])&255]^(c>>>8);return(~c)>>>0};
-function zip(fs){const parts=[],cd=[],enc=new TextEncoder();let off=0;
- fs.forEach(f=>{const nm=enc.encode(f.n),c=crc(f.d),n=f.d.length,h=new DataView(new ArrayBuffer(30));
-  h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint32(14,c,true);h.setUint32(18,n,true);h.setUint32(22,n,true);h.setUint16(26,nm.length,true);
-  parts.push(h.buffer,nm,f.d);
-  const e=new DataView(new ArrayBuffer(46));e.setUint32(0,0x02014b50,true);e.setUint16(4,20,true);e.setUint16(6,20,true);e.setUint32(16,c,true);e.setUint32(20,n,true);e.setUint32(24,n,true);e.setUint16(28,nm.length,true);e.setUint32(42,off,true);
-  cd.push(e.buffer,nm);off+=30+nm.length+n});
- const cs=cd.reduce((a,b)=>a+b.byteLength,0),en=new DataView(new ArrayBuffer(22));
- en.setUint32(0,0x06054b50,true);en.setUint16(8,fs.length,true);en.setUint16(10,fs.length,true);en.setUint32(12,cs,true);en.setUint32(16,off,true);
- return new Blob([...parts,...cd,en.buffer],{type:'application/zip'})}
-
-let DL=null;const msg=m=>$('#msg').textContent=m,btn=v=>['#bs','#bw','#bm','#bp','#bg'].forEach(s=>$(s).disabled=v);
-async function run(fn){if(busy)return;busy=true;btn(true);
- try{await document.fonts.load(`${P.size}px "${P.font}"`,P.text);await fn();}
- catch(e){msg(e&&e.code==='declined'?'Cancelled.':'Export failed: '+(e.message||e.code||e))}
- busy=false;btn(false)}
-$('#bp').onclick=()=>run(async()=>{
- const n=Math.round(P.dur*P.fps),fs=[];
- for(let f=0;f<n;f++){render(f/P.fps);const b=await new Promise(r=>cv.toBlob(r,'image/png'));
-  fs.push({n:`frame_${String(f+1).padStart(4,'0')}.png`,d:new Uint8Array(await b.arrayBuffer())});msg(`Render ${f+1}/${n}`)}
- await DL.save({filename:'battle-ui-frames.zip',data:zip(fs)});msg('PNG sequence saved.')});
-$('#bw').onclick=()=>run(async()=>{
- const n=Math.round(P.dur*P.fps),st=cv.captureStream(0),tk=st.getVideoTracks()[0];
- const mt=['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'].find(m=>MediaRecorder.isTypeSupported(m));
- const rec=new MediaRecorder(st,{mimeType:mt,videoBitsPerSecond:12e6}),chunks=[];
- rec.ondataavailable=e=>e.data.size&&chunks.push(e.data);
- const done=new Promise(r=>rec.onstop=r);rec.start();
- for(let f=0;f<n;f++){render(f/P.fps);tk.requestFrame();msg(`Render ${f+1}/${n}`);await new Promise(r=>setTimeout(r,1000/P.fps))}
- rec.stop();await done;
- await DL.save({filename:'battle-ui.webm',data:new Blob(chunks,{type:'video/webm'})});msg('WebM saved.')});
-
-function quant(h){
- const cols=[];for(let c=0;c<32768;c++)if(h[c])cols.push(c);
- const ch=(c,k)=>k?k===1?(c>>5)&31:c&31:c>>10;let bx=[cols];
- while(bx.length<255){let bi=-1,bs=0,bk=0;
-  bx.forEach((b,i)=>{if(b.length<2)return;let be=-1,kk=0,cnt=0;for(let k=0;k<3;k++){let mn=31,mx=0;for(const c of b){const v=ch(c,k);if(v<mn)mn=v;if(v>mx)mx=v}if(mx-mn>be){be=mx-mn;kk=k}}
-   for(const c of b)cnt+=h[c];const s=cnt*(be+1);if(s>bs){bs=s;bi=i;bk=kk}});
-  if(bi<0)break;
-  const b=bx[bi].sort((x,y)=>ch(x,bk)-ch(y,bk));let tot=0;for(const c of b)tot+=h[c];let a=0,m=0;for(;m<b.length-2;m++){a+=h[b[m]];if(a>=tot/2)break}
-  bx.splice(bi,1,b.slice(0,m+1),b.slice(m+1))}
- const pal=new Array(768).fill(0),map=new Uint8Array(32768);
- bx.forEach((b,i)=>{let r=0,g=0,bl=0,t=0;for(const c of b){const n=h[c];r+=(c>>10)*n;g+=((c>>5)&31)*n;bl+=(c&31)*n;t+=n;map[c]=i+1}
-  if(t){const e=v=>Math.min(255,Math.round(v/t*8+4));pal[(i+1)*3]=e(r);pal[(i+1)*3+1]=e(g);pal[(i+1)*3+2]=e(bl)}});
- return{pal,map}}
-function lzw(px){const cl=256,eoi=257;let sz=9,nx=258,cur=0,bits=0;const dict=new Map(),out=[];
- const put=c=>{cur|=c<<bits;bits+=sz;while(bits>=8){out.push(cur&255);cur>>>=8;bits-=8}};
- put(cl);let pre=px[0];
- for(let i=1;i<px.length;i++){const k=px[i],key=pre*256+k,v=dict.get(key);
-  if(v!==undefined)pre=v;else{put(pre);if(nx<4096){dict.set(key,nx++);if(nx>(1<<sz)&&sz<12)sz++}else{put(cl);dict.clear();sz=9;nx=258}pre=k}}
- put(pre);put(eoi);if(bits>0)out.push(cur&255);
- const r=[];for(let i=0;i<out.length;i+=255){const c=out.slice(i,i+255);r.push(new Uint8Array([c.length,...c]))}return r}
-$('#bg').onclick=()=>run(async()=>{
- const n=Math.round(P.dur*P.gfps),w=P.gw,h=Math.round(cv.height*w/cv.width),g=document.createElement('canvas');g.width=w;g.height=h;
- const gx=g.getContext('2d',{willReadFrequently:true});gx.imageSmoothingQuality='high';
- const frs=[],hist=new Uint32Array(32768);
- for(let f=0;f<n;f++){render(f/P.gfps);gx.clearRect(0,0,w,h);gx.drawImage(cv,0,0,w,h);const d=gx.getImageData(0,0,w,h).data;
-  for(let i=0;i<d.length;i+=4)if(d[i+3]>=128)hist[(d[i]>>3)<<10|(d[i+1]>>3)<<5|d[i+2]>>3]++;
-  frs.push(d);msg(`Render ${f+1}/${n}`);if(f%4===3)await new Promise(r=>setTimeout(r))}
- msg('Building palette...');await new Promise(r=>setTimeout(r));
- const{pal,map}=quant(hist),B=[],u16=v=>[v&255,v>>8],dl=Math.max(2,Math.round(100/P.gfps));
- B.push(new Uint8Array([71,73,70,56,57,97,...u16(w),...u16(h),0xF7,0,0,...pal,33,255,11,...[...'NETSCAPE2.0'].map(c=>c.charCodeAt(0)),3,1,0,0,0]));
- for(let f=0;f<n;f++){const d=frs[f],ix=new Uint8Array(w*h);
-  for(let i=0,j=0;i<d.length;i+=4,j++)ix[j]=d[i+3]<128?0:map[(d[i]>>3)<<10|(d[i+1]>>3)<<5|d[i+2]>>3];
-  B.push(new Uint8Array([33,249,4,9,...u16(dl),0,0,44,0,0,0,0,...u16(w),...u16(h),0,8]),...lzw(ix),new Uint8Array([0]));
-  msg(`Encode ${f+1}/${n}`);if(f%4===3)await new Promise(r=>setTimeout(r))}
- B.push(new Uint8Array([59]));
- await DL.save({filename:'battle-ui.gif',data:new Blob(B,{type:'image/gif'})});msg('GIF saved.')});
-
-const mp4=(id,name)=>{$(id).onclick=()=>run(async()=>{
- if(!window.VideoEncoder||!window.Mp4Muxer)throw new Error('MP4 export needs a recent Chrome or Edge over HTTPS. Use the PNG sequence instead.');
- const col={'Green screen':'#00ff00','Blue screen':'#0000ff','Black screen':'#000000'}[P.mbg],W=cv.width,H=cv.height,n=Math.round(P.dur*P.fps);
- const cfg={codec:'avc1.64002A',width:W,height:H,bitrate:16e6,framerate:P.fps};
- if(!(await VideoEncoder.isConfigSupported(cfg)).supported)throw new Error('This browser cannot encode H.264 at this size.');
- const mx=new Mp4Muxer.Muxer({target:new Mp4Muxer.ArrayBufferTarget(),video:{codec:'avc',width:W,height:H},fastStart:'in-memory'});
- let err=null;const enc=new VideoEncoder({output:(c,m)=>mx.addVideoChunk(c,m),error:e=>err=e});enc.configure(cfg);
- const oc=document.createElement('canvas');oc.width=W;oc.height=H;const ox=oc.getContext('2d');
- for(let f=0;f<n;f++){render(f/P.fps);ox.fillStyle=col;ox.fillRect(0,0,W,H);ox.drawImage(cv,0,0);
-  const fr=new VideoFrame(oc,{timestamp:Math.round(f*1e6/P.fps),duration:Math.round(1e6/P.fps)});enc.encode(fr,{keyFrame:f%P.fps===0});fr.close();
-  if(err)throw err;while(enc.encodeQueueSize>8)await new Promise(r=>setTimeout(r,5));
-  msg(`Encode ${f+1}/${n}`);if(f%5===4)await new Promise(r=>setTimeout(r))}
- await enc.flush();if(err)throw err;mx.finalize();
- await DL.save({filename:name,data:new Blob([mx.target.buffer],{type:'video/mp4'})});msg('MP4 saved.')})};
-mp4('#bm','battle-ui.mp4');
-$('#bs').onclick=()=>run(async()=>{render(.9*P.hold+Math.max(P.popd,1)+P.stag*8,true);const b=await new Promise(r=>cv.toBlob(r,'image/png'));await DL.save({filename:'battle-ui.png',data:b});msg('PNG saved.')});
-build();swatches();$('#fl').replaceChildren(...FONTS.map(f=>new Option(f,f)));requestAnimationFrame(loop);
-const FB={save:async({filename,data})=>{const b=data instanceof Blob?data:new Blob([data]),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),5000);return{status:'saved'}}};
-const useFB=()=>{DL=FB;btn(false)};
-if(window.claude&&claude.use){claude.use('downloads').then(d=>{if(d){DL=d;btn(false)}else useFB()}).catch(useFB)}
-else useFB();
+document.getElementById('list').innerHTML=RTOOLS.tools.map(t=>`<li><a class="tool" href="${t.dir}/${RTOOLS.X}"><span class="ico" aria-hidden="true">${t.icon}</span><span><h2>${t.name}</h2><p>${t.desc}</p><span class="tag">${t.tag}</span></span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></li>`).join('');
 </script>
 </body>
 </html>
