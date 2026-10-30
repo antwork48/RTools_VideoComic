@@ -67,7 +67,7 @@ textarea{width:100%;grid-column:2/4;background:var(--bg);color:var(--text);borde
 <section class="panel">
   <div class="pre" id="pre"></div>
   <div id="ui"></div><datalist id="fl"></datalist>
-  <p class="note">Pick a mode: command menu, dialogue box, or both. Put one command per line (and one help line per command in the same order). With Auto cycle on, the highlight steps through the commands, so set Duration to about commands x hold time for a clean loop. Layout is designed at 1920x1080 and scales to other sizes. Exports are transparent; MP4 fills the background with the chosen screen color for keying. GIF supports only 256 colors and on/off transparency. This is an original, inspired-by style and uses no game assets.</p>
+  <p class="note">Pick a mode: command menu, dialogue box, or both. Put one command per line (and one help line per command in the same order). With Auto cycle on, the highlight steps through the commands, so set Duration to about commands x hold time for a clean loop. In wheel mode each command line is LABEL | subtitle | button, where button is circle, cross, square, triangle, L2, R2, or pad; the first items (set by Items on the left side) go to the left cluster. Layout is designed at 1920x1080 and scales to other sizes. Exports are transparent; MP4 fills the background with the chosen screen color for keying. GIF supports only 256 colors and on/off transparency. This is an original, inspired-by style and uses no game assets.</p>
 </section>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.3/build/mp4-muxer.js"></script>
@@ -78,15 +78,18 @@ const TAU=Math.PI*2,rad=Math.PI/180;
 const FONTS=['Anton','Bebas Neue','Oswald','Dela Gothic One','Rubik Mono One','Black Han Sans','Teko'];
 const ANIMS=['none','fade','pop','slam','drop','slide','rise','spin','stretch','scatter'];
 const PAL=[['Red','#e5171f'],['Crimson','#c2185b'],['Orange','#ff7a1a'],['Yellow','#ffd400'],['Green','#22c55e'],['Cyan','#1ec8e6'],['Blue','#2b6bff'],['Violet','#8b5cf6'],['Pink','#ff4fa3'],['White','#f2f2f2']];
-const P={mode:'both',font:'Anton',bold:'off',base:'#e5171f',tm:'dark',slant:.18,shake:2,
+const P={mode:'wheel',font:'Anton',bold:'off',base:'#e5171f',tm:'dark',slant:.18,shake:2,
  cmds:'ATTACK\nSKILL\nITEM\nGUARD\nTACTICS\nESCAPE',help:'Strike the enemy with your weapon.\nUnleash a powerful special skill.\nUse a recovery or support item.\nBrace for the incoming attack.\nChange the party strategy.\nRun away from this battle.',
  sel:0,cycle:'on',hold:1,isize:50,ih:78,igap:12,sk:24,jag:7,ss:1.3,stairs:18,mx:90,my:100,hb:'on',
  name:'Joker',line:'Time to take their hearts. Are you ready?',dsize:44,dw:1100,dpad:44,side:'left',tw:28,ind:'on',
  ain:'slide',aout:'slide',pop:1,popd:.35,outd:.3,stag:.06,
+ wcmds:'ORDER | Give tactical orders | L2\nGUN | Take aim and shoot | pad\nPERSONA | Use a Persona skill | triangle\nITEM | Use an item | square\nSWORD | Attack with a melee weapon | circle\nGUARD | Defend against attacks | cross',wlc:2,wx:60,wy:58,wsz:74,wss:28,wsp:140,wfan:11,wbul:60,wgap:84,wow:9,wlj:.5,wfirst:1.35,wsh:'on',
  res:'1920x1080',dur:6,fps:30,gw:480,gfps:20,mbg:'Green screen'};
 const DEF={...P};
 const PRE={
- 'Menu + dialogue':{},
+ 'Wheel menu':{},
+ 'Wheel + dialogue':{mode:'wheel + dialogue'},
+ 'List menu + dialogue':{mode:'both'},
  'Menu only':{mode:'menu'},
  'Dialogue only':{mode:'dialogue',cycle:'off'},
  'Light theme':{tm:'light'},
@@ -95,8 +98,9 @@ const PRE={
  'Quick pop':{ain:'pop',aout:'fade',stag:.04,popd:.25}
 };
 const S=[
-['General',[['mode','Mode','s',['both','menu','dialogue']],['font','Font (type an installed font name)','x'],['bold','Bold','s',['off','on']],['base','Theme color','c'],['tm','Panels','s',['dark','light']],['slant','Text slant',0,.4,.01],['shake','Shake',0,20,.5]]],
-['Command menu',[['cmds','Commands (one per line)','m'],['help','Help text (one per command)','m'],['sel','Selected command (when cycle off)',0,9,1],['cycle','Auto cycle highlight','s',['on','off']],['hold','Hold per command (s)',.3,3,.1],['isize','Text size',20,90,1],['ih','Item height',40,140,1],['igap','Gap',0,40,1],['sk','Slant of plates',0,60,1],['jag','Jagged edge',0,20,.5],['ss','Selected scale',1,1.8,.05],['stairs','Stair offset',0,50,1],['hb','Help box','s',['on','off']],['mx','Margin X',0,400,1],['my','Margin bottom',0,400,1]]],
+['General',[['mode','Mode','s',['wheel','wheel + dialogue','both','menu','dialogue']],['font','Font (type an installed font name)','x'],['bold','Bold','s',['off','on']],['base','Theme color','c'],['tm','Panels','s',['dark','light']],['slant','Text slant',0,.4,.01],['shake','Shake',0,20,.5],['cycle','Auto cycle highlight','s',['on','off']],['hold','Hold per command (s)',.3,3,.1],['sel','Selected command (when cycle off)',0,9,1]]],
+['Wheel menu',[['wcmds','Commands: label | subtitle | button','m'],['wlc','Items on the left side',0,6,1],['wx','Center X (%)',20,90,1],['wy','Center Y (%)',20,90,1],['wsz','Label size',30,160,1],['wss','Subtitle size',14,60,1],['wsp','Row spacing',60,220,1],['wfan','Fan rotation (deg)',0,25,.5],['wbul','Arc bulge (px)',0,200,1],['wgap','Center gap (px)',20,300,1],['wow','Outline width',2,20,.5],['wlj','Letter jitter',0,1,.05],['wfirst','First letter scale',1,2,.05],['wsh','Red shards','s',['on','off']]]],
+['Command menu',[['cmds','Commands (one per line)','m'],['help','Help text (one per command)','m'],['isize','Text size',20,90,1],['ih','Item height',40,140,1],['igap','Gap',0,40,1],['sk','Slant of plates',0,60,1],['jag','Jagged edge',0,20,.5],['ss','Selected scale',1,1.8,.05],['stairs','Stair offset',0,50,1],['hb','Help box','s',['on','off']],['mx','Margin X',0,400,1],['my','Margin bottom',0,400,1]]],
 ['Dialogue',[['name','Speaker name','t'],['line','Dialogue text','m'],['dsize','Text size',20,90,1],['dw','Box width',500,1700,10],['dpad','Padding',10,100,1],['side','Name plate side','s',['left','right']],['tw','Typewriter (chars/sec, 0 = off)',0,80,1],['ind','Next indicator','s',['on','off']]]],
 ['Motion',[['ain','Animation in','s',ANIMS],['aout','Animation out','s',ANIMS],['pop','Strength',0,1.5,.05],['popd','In duration (s)',.1,1.5,.05],['outd','Out duration (s)',.1,1.5,.05],['stag','Stagger (s)',0,.3,.01]]],
 ['Canvas and export',[['res','Canvas','s',['1920x1080','1280x720','1080x1920','1080x1080']],['dur','Duration (s)',1,20,.5],['fps','FPS','s',[24,30,60]],['gw','GIF width (px)','s',[320,480,640,800,1000]],['gfps','GIF FPS','s',[12,15,20,25,30]],['mbg','MP4 background','s',['Green screen','Blue screen','Black screen']]]]
@@ -106,7 +110,7 @@ let TEX=null;const ctl={};
 function setRes(){const m=/(\d+)x(\d+)/.exec(P.res);if(m){cv.width=+m[1];cv.height=+m[2]}}
 function build(){
  S.forEach(([g,items],gi)=>{
-  const d=document.createElement('details');d.open=gi<4;d.innerHTML=`<summary>${g}</summary>`;
+  const d=document.createElement('details');d.open=gi<5;d.innerHTML=`<summary>${g}</summary>`;
   items.forEach(([k,l,a,b,c])=>{
    const row=document.createElement('label');row.innerHTML=`<span>${l}</span>`;let el;
    if(a==='t'){el=document.createElement('input');el.type='text'}
@@ -122,7 +126,7 @@ function build(){
    ctl[k]=el;row.append(el);if(el.out)row.append(el.out);d.append(row)});
   if(gi===0){const b=document.createElement('button');b.textContent='Load fonts from this PC';b.onclick=loadLocal;const n=document.createElement('p');n.className='note';n.id='fnote';n.textContent='Type the font name exactly as installed on your PC, or load the list.';const fs=document.createElement('p');fs.className='note';fs.id='fstat';d.append(b,n,fs)}
   $('#ui').append(d)});
- Object.keys(PRE).forEach(n=>{const b=document.createElement('button');b.textContent=n;b.onclick=()=>{Object.assign(P,DEF,{base:P.base,cmds:P.cmds,help:P.help,name:P.name,line:P.line},PRE[n]);sync()};$('#pre').append(b)});
+ Object.keys(PRE).forEach(n=>{const b=document.createElement('button');b.textContent=n;b.onclick=()=>{Object.assign(P,DEF,{base:P.base,cmds:P.cmds,help:P.help,name:P.name,line:P.line,wcmds:P.wcmds},PRE[n]);sync()};$('#pre').append(b)});
  sync()}
 function sync(){for(const k in ctl){ctl[k].value=P[k];if(ctl[k].out)ctl[k].out.textContent=P[k]}setRes();loadFonts()}
 const hasFont=n=>{const g=document.createElement('canvas').getContext('2d'),t='mmmmmmmmmmlli WQ@';const w=f=>{g.font=`72px ${f}`;return g.measureText(t).width};return w(`"${n}",monospace`)!==w('monospace')||w(`"${n}",serif`)!==w('serif')};
@@ -178,7 +182,7 @@ function drawMenu(T,t,still,LW,LH){
   part(n,hx+hw/2,hy+hh/2,()=>{plate(slab(hx,hy,hw,hh,P.sk,P.jag*.8,77),T.ink,T.oc,3,7);ctx.fillStyle=T.main;ctx.fill(poly(slab(hx+10,hy+8,26,hh-16,P.sk*.4,1.5,78)));
    const ls=hl[sel]||[];ls.forEach((ln,i)=>stext(ln,hx+P.sk+58,hy+hh/2+(i-(ls.length-1)/2)*hsz*1.3,hsz,T.inkT,'#000',0))})}}
 function drawDialog(T,t,still,LW,LH){
- const both=P.mode==='both',dw=Math.min(P.dw,both?LW*.5:LW-160),dp=P.dpad,sz=P.dsize;
+ const both=P.mode==='both'||P.mode==='wheel + dialogue',dw=Math.min(P.dw,P.mode==='wheel + dialogue'?LW*.4:both?LW*.5:LW-160),dp=P.dpad,sz=P.dsize;
  ctx.font=fontStr(sz);const lines=wrap(P.line,dw-2*dp-60),lh=sz*1.32,bh=lines.length*lh+2*dp,bx=both?P.mx:(LW-dw)/2,by=LH-P.my-bh;
  let left=P.tw>0&&!still?Math.floor(Math.max(0,t-P.popd-P.stag)*P.tw):1e9;
  part(0,bx+dw/2,by+bh/2,()=>{
@@ -189,13 +193,64 @@ function drawDialog(T,t,still,LW,LH){
   if(P.ind==='on'){const bob=still?0:Math.sin(t*7)*5,ix=bx+dw-80,iy=by+bh-46+bob;ctx.fillStyle=T.main;ctx.fill(poly([[ix,iy],[ix+30,iy],[ix+15,iy+22]]))}});
  if(P.name.trim()){ctx.font=fontStr(sz*.95);const nw=ctx.measureText(P.name).width+110,nh=sz*1.55,nx=P.side==='right'?bx+dw-nw-50:bx+50,ny=by-nh*.62;
   part(1,nx+nw/2,ny+nh/2,()=>{plate(slab(nx,ny,nw,nh,26,P.jag*.7,92),T.main,'#ffffff',5,9);stext(P.name,nx+nw/2-6,ny+nh/2,sz*.95,T.lab,T.labO,3,'center')})}}
+
+function btnIcon(kind,cx,cy,r){
+ ctx.save();ctx.translate(cx,cy);ctx.lineJoin='round';ctx.lineCap='round';
+ if(/^[lr][12]$/.test(kind)){const w=r*2.4,h=r*1.5;ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,h,h*.35);ctx.fillStyle='#fff';ctx.fill();ctx.lineWidth=r*.2;ctx.strokeStyle='#0a0a0c';ctx.stroke();ctx.fillStyle='#0a0a0c';ctx.font=`bold ${r*.95}px Arial,sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(kind.toUpperCase(),0,r*.05)}
+ else if(kind){ctx.beginPath();ctx.arc(0,0,r,0,TAU);ctx.fillStyle='#0a0a0c';ctx.fill();ctx.lineWidth=r*.16;ctx.strokeStyle='#fff';ctx.stroke();
+  const col={triangle:'#3be37a',square:'#ff7ac8',circle:'#ff4455',cross:'#5aa2ff'}[kind];
+  if(kind==='pad'){ctx.fillStyle='#fff';ctx.fillRect(-r*.14,-r*.5,r*.28,r);ctx.fillRect(-r*.5,-r*.14,r,r*.28)}
+  else{ctx.strokeStyle=col||'#fff';ctx.lineWidth=r*.2;ctx.beginPath();
+   if(kind==='triangle'){ctx.moveTo(0,-r*.5);ctx.lineTo(r*.5,r*.35);ctx.lineTo(-r*.5,r*.35);ctx.closePath()}
+   else if(kind==='square')ctx.rect(-r*.4,-r*.4,r*.8,r*.8);
+   else if(kind==='circle')ctx.arc(0,0,r*.42,0,TAU);
+   else{ctx.moveTo(-r*.38,-r*.38);ctx.lineTo(r*.38,r*.38);ctx.moveTo(r*.38,-r*.38);ctx.lineTo(-r*.38,r*.38)}
+   ctx.stroke()}}
+ ctx.restore()}
+function bigText(txt,x,y,size,align,seed,draw){
+ const ch=[...txt.toUpperCase()],js=P.wlj,szs=ch.map((c,i)=>size*(i===0?P.wfirst:1)*(1+(rnd(seed*11+i)-.5)*.16*js));
+ ctx.save();const ws=ch.map((c,i)=>{ctx.font=fontStr(szs[i]);return ctx.measureText(c).width}),gap=-size*.045,tot=ws.reduce((a,b)=>a+b,0)+gap*Math.max(0,ch.length-1);
+ if(!draw){ctx.restore();return tot}
+ let px=align==='right'?x-tot:x;const lx=ws.map(w=>{const v=px;px+=w+gap;return v}),fill=P.tm==='dark'?'#ffffff':'#0a0a0c',edge=P.tm==='dark'?'#0a0a0c':'#ffffff',sw=P.wow;
+ ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';
+ const each=fn=>ch.forEach((c,i)=>{ctx.save();ctx.translate(lx[i]+ws[i]/2,y+(rnd(seed*7+i)-.5)*size*.16*js);ctx.rotate((rnd(seed*5+i)-.5)*.12*js);ctx.transform(1,0,-P.slant,1,0,0);ctx.font=fontStr(szs[i]);fn(c);ctx.restore()});
+ ctx.save();ctx.translate(sw*.7,sw*.8);ctx.strokeStyle='rgba(0,0,0,.55)';ctx.lineWidth=sw*2;each(c=>ctx.strokeText(c,0,0));ctx.restore();
+ ctx.strokeStyle=edge;ctx.lineWidth=sw*2;each(c=>ctx.strokeText(c,0,0));
+ ctx.fillStyle=fill;each(c=>ctx.fillText(c,0,0));ctx.restore();return tot}
+function subText(txt,x,y,size,align){if(!txt)return;ctx.save();ctx.font=fontStr(size);ctx.textAlign=align;ctx.textBaseline='middle';ctx.lineJoin='round';ctx.translate(x,y);ctx.transform(1,0,-P.slant,1,0,0);ctx.lineWidth=size*.34;ctx.strokeStyle=P.tm==='dark'?'#0a0a0c':'#ffffff';ctx.strokeText(txt,0,0);ctx.fillStyle=P.tm==='dark'?'#ffffff':'#0a0a0c';ctx.fillText(txt,0,0);ctx.restore()}
+function shards(cx,cy,sp,seed,T,t,still){
+ const st=still?0:Math.floor(t*10),r=k=>rnd(seed*17+k+st*3),n=10,blob=[];
+ for(let i=0;i<12;i++){const a=i/12*TAU;blob.push([cx+Math.cos(a)*sp*(.34+r(i+100)*.3)*1.25,cy+Math.sin(a)*sp*(.3+r(i+120)*.28)])}
+ ctx.save();ctx.translate(12,12);ctx.fillStyle='rgba(0,0,0,.5)';ctx.fill(poly(blob));ctx.restore();
+ for(let i=0;i<n;i++){const a=i/n*TAU+(r(i)-.5)*.9,len=sp*(.5+r(i+30)*.55),w=sp*(.045+r(i+60)*.06),bx=cx+Math.cos(a)*sp*.12,by=cy+Math.sin(a)*sp*.12,px=-Math.sin(a),py=Math.cos(a);
+  ctx.fillStyle=i%3===2?'#0a0a0c':T.main;ctx.beginPath();ctx.moveTo(bx+px*w,by+py*w);ctx.lineTo(cx+Math.cos(a)*len*1.15,cy+Math.sin(a)*len*.85);ctx.lineTo(bx-px*w,by-py*w);ctx.closePath();ctx.fill()}
+ ctx.fillStyle=T.main;ctx.fill(poly(blob))}
+function drawWheel(T,t,still,LW,LH){
+ const it=P.wcmds.split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{const a=l.split('|').map(x=>x.trim());return{label:a[0]||'',sub:a[1]||'',btn:(a[2]||'').toLowerCase()}}),n=it.length;if(!n)return;
+ const lc=Math.max(0,Math.min(P.wlc,n));let sel=Math.min(P.sel,n-1),since=9;
+ if(P.cycle==='on'&&!still){const q=t/P.hold;sel=Math.floor(q)%n;since=(q%1)*P.hold}
+ const pop=still?1:.9+.1*eob(clamp(since/.2)),Cx=LW*(P.mode==='wheel + dialogue'?Math.max(P.wx,68):P.wx)/100,Cy=LH*P.wy/100,step=Math.floor(t*24),sz=P.wsz;
+ const groups=[it.slice(0,lc).map((o,i)=>({...o,idx:i})),it.slice(lc).map((o,i)=>({...o,idx:lc+i}))];
+ if(P.wsh==='on')groups.forEach((g,gi)=>{if(!g.length)return;const side=gi?1:-1,cx=Cx+side*(P.wgap+sz*1.7),cy=Cy;part(gi,cx,cy,()=>shards(cx,cy,sz*3.4,gi+3,T,t,still))});
+ groups.forEach((g,gi)=>{const side=gi?1:-1,m=g.length,cj=(m-1)/2;
+  g.forEach((o,j)=>{
+   const isS=o.idx===sel,d=j-cj,ang=d*P.wfan*rad,bul=P.wbul*(1-Math.cos(d*P.wfan*rad*1.4)),sc=(isS?P.ss*pop:.92),x=Cx+side*(P.wgap+bul-(isS?24:0)),y=Cy+d*P.wsp,iR=sz*.4;
+   part(2+o.idx,x,y,()=>{
+    const jit=isS&&!still?(rnd(step*3+o.idx)-.5)*.03*(P.shake/2):0;
+    ctx.translate(x,y);ctx.rotate(ang+jit);ctx.scale(sc,sc);
+    const tx=side>0?iR*2+20:0,al=side>0?'left':'right',tw=bigText(o.label,tx,0,sz,al,o.idx+1,false);
+    if(isS){const x0=side>0?tx:-tw;plate(slab(x0-22,-sz*.52,tw+44,sz*1.04,24,3,o.idx+40),T.main,'#0a0a0c',4,8)}
+    bigText(o.label,tx,0,sz,al,o.idx+1,true);
+    subText(o.sub,tx,sz*.72,P.wss,al);
+    if(o.btn)btnIcon(o.btn,side>0?iR:iR+22,-2,iR)})})});}
 function render(t,still){
  const W=cv.width,H=cv.height,T=theme(),sc=W>=H?W/1920:W/1080,LW=W/sc,LH=H/sc;
  ctx.clearRect(0,0,W,H);_t=t;_still=!!still;
  const fr=Math.floor(t*P.fps+1e-6),gx=still?0:(rnd(fr*31+5)-.5)*2*P.shake*.5,gy=still?0:(rnd(fr*17+9)-.5)*2*P.shake*.5;
  ctx.save();ctx.scale(sc,sc);ctx.translate(gx,gy);
- if(P.mode!=='menu')drawDialog(T,t,still,LW,LH);
- if(P.mode!=='dialogue')drawMenu(T,t,still,LW,LH);
+ if(P.mode==='dialogue'||P.mode==='both'||P.mode==='wheel + dialogue')drawDialog(T,t,still,LW,LH);
+ if(P.mode==='menu'||P.mode==='both')drawMenu(T,t,still,LW,LH);
+ if(P.mode==='wheel'||P.mode==='wheel + dialogue')drawWheel(T,t,still,LW,LH);
  ctx.restore()}
 let playing=true,t0=performance.now(),tp=0,busy=false;
 function loop(now){if(!busy){if(playing)tp=((now-t0)/1000)%P.dur;render(tp)}requestAnimationFrame(loop)}
