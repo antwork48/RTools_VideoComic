@@ -12,6 +12,7 @@ ICON.crop='<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-wid
 ICON.bubble='<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"><path d="M24 8C14 8 6 14 6 22c0 4 2 7.500 5.500 10L10 41l8.500-5c1.800.4 3.600.6 5.500.6 10 0 18-6.200 18-14.200S34 8 24 8z"/><path d="M16.500 22h.1M24 22h.1M31.500 22h.1" stroke-width="4"/></svg>';
 ICON.chat='<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"><rect x="4" y="18" width="40" height="22" rx="6"/><rect x="9" y="7" width="17" height="13" rx="4" fill="currentColor" fill-opacity=".3"/><path d="M13 29.500h22"/></svg>';
 ICON.battle='<svg viewBox="0 0 48 48" fill="currentColor"><path d="M16 7h28l-4 12H12z"/><path d="M10 24h28l-4 10H6z" fill-opacity=".4"/><path d="M14 38h22l-3 7H11z" fill-opacity=".4"/></svg>';
+ICON.vfx='<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"><rect x="5" y="14" width="38" height="26" rx="5"/><path d="M17 5l7 9 7-9"/><path d="M11 23h18M11 30h11" stroke-width="3"/><circle cx="36" cy="27" r="1.800" fill="currentColor"/></svg>';
 window.RTOOLS={X,brand:'RTools Comic',tools:[
  {name:'SFX Animator',dir:'sfx_animator',icon:ICON.sfx,desc:'Animated onomatopoeia text, JJBA style. Curves, gradients, strokes, wiggle, shake, and textures.',tag:'Exports WebM, MP4, PNG sequence, GIF'},
  {name:'Comic SFX Maker',dir:'comic_sfx',icon:ICON.comic,desc:'American comic sound effects: POW and BAM text over Ben-Day dot bursts with extruded 3D lettering.',tag:'Exports PNG, PNG sequence, WebM, MP4, GIF'},
@@ -19,7 +20,8 @@ window.RTOOLS={X,brand:'RTools Comic',tools:[
  {name:'Anime BG Maker',dir:'bg_anime',icon:ICON.bg,desc:'Anime-style backgrounds: halftone, speed lines, focus lines, and rays. Supports looping animation and transparent output.',tag:'Exports PNG, PNG sequence, WebM, MP4'},
  {name:'Image Cropper',dir:'crop',icon:ICON.crop,desc:'Crop pasted screenshots to an exact pixel size, add a frame and shadow, and export static PNG or an animated clip.',tag:'Exports PNG, ZIP, WebM, MP4, GIF'},
  {name:'Chat Maker',dir:'chat',icon:ICON.chat,desc:'Stream chat overlays that size themselves to the text: 7 designs, 18 theme colors, and batch export for many messages.',tag:'Exports PNG, batch ZIP, WebM, MP4, GIF'},
- {name:'Battle UI Maker',dir:'battle',icon:ICON.battle,desc:'Angular red-and-black game UI: an animated combat command menu and dialogue box, with theme colors and auto-cycling highlight.',tag:'Exports PNG, PNG sequence, WebM, MP4, GIF'}
+ {name:'Battle UI Maker',dir:'battle',icon:ICON.battle,desc:'Angular red-and-black game UI: an animated combat command menu and dialogue box, with theme colors and auto-cycling highlight.',tag:'Exports PNG, PNG sequence, WebM, MP4, GIF'},
+ {name:'Retro Video FX',dir:'videofx',icon:ICON.vfx,desc:'Import a video and add VHS, CRT, TV glitch, or camcorder looks, with chromatic aberration and lens distortion. Exports MP4 with audio.',tag:'Imports video, exports MP4 and PNG'}
 ]};
 class RtNav extends HTMLElement{
  connectedCallback(){
