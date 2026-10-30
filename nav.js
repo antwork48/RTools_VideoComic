@@ -23,24 +23,29 @@ window.RTOOLS={X,brand:'RTools Comic',tools:[
  {name:'Battle UI Maker',dir:'battle',icon:ICON.battle,desc:'Angular red-and-black game UI: an animated combat command menu and dialogue box, with theme colors and auto-cycling highlight.',tag:'Exports PNG, PNG sequence, WebM, MP4, GIF'},
  {name:'Retro Video FX',dir:'videofx',icon:ICON.vfx,desc:'Import a video and add VHS, CRT, TV glitch, or camcorder looks, with chromatic aberration and lens distortion. Exports MP4 with audio.',tag:'Imports video, exports MP4 and PNG'}
 ]};
+const HOME='<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"><path d="M6 22 24 7l18 15v17a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3z"/><path d="M19 42V29h10v13"/></svg>';
 class RtNav extends HTMLElement{
  connectedCallback(){
   if(this.shadowRoot)return;
   const r=this.attachShadow({mode:'open'}),B=window.RTOOLS,p=location.pathname.replace(/index\.html$/,'');
-  const items=[{name:'Home',href:base.href+X,on:p===base.pathname},...B.tools.map(t=>{const u=new URL(t.dir+'/',base);return{name:t.name,href:u.href+X,on:p.startsWith(u.pathname)}})];
+  const items=[{name:'Home',icon:HOME,href:base.href+X,on:p===base.pathname},...B.tools.map(t=>{const u=new URL(t.dir+'/',base);return{name:t.name,icon:t.icon,href:u.href+X,on:p.startsWith(u.pathname)}})];
   r.innerHTML=`<style>
 :host{display:block}
 nav{height:52px;display:flex;align-items:center;gap:18px;padding:0 max(16px,calc((100% - 1200px)/2 + 16px));background:rgba(14,11,20,.93);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom:1px solid #2a2238;font-size:14px;font-weight:600}
 .brand{display:flex;align-items:center;gap:9px;color:#ece8f5;text-decoration:none;font-weight:800;font-size:15px;white-space:nowrap}
 .brand b{display:grid;place-items:center;width:26px;height:26px;border-radius:7px;background:#8b5cf6;color:#fff;font-size:14px}
-.links{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0}
+.links{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0}
 .links::-webkit-scrollbar{display:none}
-.links a{padding:8px 12px;border-radius:8px;color:#9a90b0;text-decoration:none;white-space:nowrap;transition:color .15s,background .15s}
+.links a{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;color:#9a90b0;text-decoration:none;white-space:nowrap;transition:color .15s,background .15s}
+.links svg{width:22px;height:22px;flex:none}
+.links a span{display:none}
+.links a[aria-current] span{display:inline}
 .links a:hover{color:#fb923c}
-.links a[aria-current]{background:#221a33;color:#c4b5fd}
+.links a[aria-current]{background:#221a33;color:#c4b5fd;padding:8px 14px 8px 12px}
 a:focus-visible{outline:2px solid #fb923c;outline-offset:2px}
-@media(max-width:560px){.brand span{display:none}nav{gap:10px;padding:0 12px}}
-</style><nav aria-label="Main"><a class="brand" href="${base.href+X}"><b>R</b><span>${B.brand}</span></a><div class="links">${items.map(i=>`<a href="${i.href}"${i.on?' aria-current="page"':''}>${i.name}</a>`).join('')}</div></nav>`;
+@media(max-width:560px){.brand span{display:none}nav{gap:10px;padding:0 12px}.links a{padding:8px 8px}.links a[aria-current]{padding:8px 12px 8px 10px}}
+</style><nav aria-label="Main"><a class="brand" href="${base.href+X}"><b>R</b><span>${B.brand}</span></a><div class="links">${items.map(i=>`<a href="${i.href}"${i.on?' aria-current="page"':` title="${i.name}"`} aria-label="${i.name}">${i.icon}<span>${i.name}</span></a>`).join('')}</div></nav>`;
+  const cur=r.querySelector('[aria-current]'),LK=r.querySelector('.links');if(cur)requestAnimationFrame(()=>{LK.scrollLeft=cur.offsetLeft-LK.clientWidth/2+cur.offsetWidth/2});
  }}
 if(!customElements.get('rtools-nav'))customElements.define('rtools-nav',RtNav);
 const st=document.createElement('style');st.textContent='rtools-nav{display:block;position:sticky;top:env(safe-area-inset-top,0px);z-index:20}:root{--nav-h:52px}';
