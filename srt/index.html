@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Premiere to SRT – RTools - Video Editing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+<script src="../nav.js"></script>
+<style>
+:root{--bg:#0e0b14;--panel:#171222;--line:#2a2238;--text:#ece8f5;--mut:#9a90b0;--acc:#8b5cf6;--acc2:#c4b5fd;--hot:#fb923c;--ok:#4ade80;--err:#f87171;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--text);font:400 15px/1.5 Manrope,system-ui,sans-serif;min-height:100%}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+main{max-width:780px;margin:0 auto;padding:22px 16px 48px}
+h1{margin:0 0 4px;font:800 22px/1.15 Manrope,sans-serif;letter-spacing:-.01em}
+.sub{color:var(--mut);margin-bottom:18px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+#drop{border:2px dashed var(--line);border-radius:10px;padding:28px 16px;text-align:center;color:var(--mut);cursor:pointer;transition:border-color .15s,background .15s}
+#drop.over,#drop:hover{border-color:var(--hot);background:rgba(251,146,60,.06)}
+#drop strong{color:var(--text)}
+#drop.has{border-style:solid;border-color:var(--acc);padding:14px}
+label{display:block;color:var(--mut);margin:12px 0 4px;font-size:13px}
+select,input[type=number]{width:100%;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:9px;font:inherit}
+.tracks{display:flex;flex-wrap:wrap;gap:8px 16px}
+.tracks label{display:flex;align-items:center;gap:6px;margin:0;color:var(--text);font-size:14px}
+input[type=checkbox]{accent-color:var(--acc);width:16px;height:16px}
+.hint{color:var(--mut);font-size:12px;margin-top:4px}
+button{font:600 14px Manrope,sans-serif;color:var(--text);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:9px 14px;cursor:pointer}
+button:hover:not(:disabled){border-color:var(--acc)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.primary{background:var(--acc);border-color:var(--acc);color:#fff}
+button.primary:hover:not(:disabled){background:#7c3aed;border-color:var(--hot)}
+:focus-visible{outline:2px solid var(--hot);outline-offset:2px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+#status{padding:10px 12px;border-radius:8px;background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--line);white-space:pre-wrap;margin-bottom:14px}
+#status.ok{border-left-color:var(--ok)}#status.error{border-left-color:var(--err)}#status.warn{border-left-color:var(--hot)}
+textarea{width:100%;height:280px;background:var(--bg);color:#ddd6f3;border:1px solid var(--line);border-radius:10px;padding:10px;font:12.5px/1.5 Consolas,"Cascadia Mono",monospace;white-space:pre;resize:vertical}
+.hidden{display:none}
+ol{padding-left:20px;color:var(--mut);margin:10px 0 0}
+ol b{color:var(--text);font-weight:600}
+</style>
+</head>
+<body>
+<main>
+  <h1>Premiere Project to SRT</h1>
+  <div class="sub">Reads the text and timing of text/graphic clips straight from the project file (.prproj). Everything runs in your browser; nothing is uploaded.</div>
+
+  <div class="card">
+    <div id="drop" tabindex="0">
+      <div id="dropMsg"><strong>Drop a .prproj file here</strong><br>or click to choose a file</div>
+    </div>
+    <input type="file" id="file" accept=".prproj" class="hidden">
+    <ol>
+      <li>In Premiere, <b>save the project</b> first (Ctrl+S) so the contents are current.</li>
+      <li>Choose the <b>.prproj</b> file here.</li>
+      <li>Pick a sequence, then save the <b>.srt</b>.</li>
+    </ol>
+  </div>
+
+  <div id="status">No file yet.</div>
+
+  <div id="opts" class="card hidden">
+    <label for="seq">Sequence</label>
+    <select id="seq"></select>
+
+    <label>Video tracks to use</label>
+    <div id="tracks" class="tracks"></div>
+
+    <label for="offset">Shift all times (seconds)</label>
+    <input type="number" id="offset" value="0" step="0.1">
+    <div class="hint">Use a negative value to move earlier, e.g. -30. Cues that fall before 0 are trimmed or dropped.</div>
+
+    <div class="row">
+      <button class="primary" id="btnSave" disabled>Save .srt</button>
+      <button id="btnCopy" disabled>Copy text</button>
+    </div>
+  </div>
+
+  <textarea id="preview" class="hidden" readonly></textarea>
+</main>
+<script>
+/* prproj -> cue teks. Berjalan di browser (DOMParser + DecompressionStream).
+ *
+ * Yang dibaca dari file project Premiere (.prproj = XML yang di-gzip):
+ *  - Sequence -> VideoTrackGroup -> VideoClipTrack -> VideoClipTrackItem
+ *  - waktu klip: ClipTrackItem > TrackItem > Start / End (ticks; Start hilang = 0)
+ *  - teks: ArbVideoComponentParam ("Source Text") di komponen klip. Nilainya blob base64 berformat
+ *    FlatBuffers: root.f0 -> tabel dokumen; dokumen.f0 -> vektor "run"; tiap run.f0 = string teks.
+ *    Blob yang identik disimpan SEKALI saja di file (BinaryHash sama), sisanya kosong -> dicari lewat hash.
+ */
+(function (root) {
+  var TPS = 254016000000;
+
+  // ---------------------------------------------------------------- FlatBuffers (mini)
+  function fbText(bytes) {
+    var dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    var N = bytes.length;
+    function u32(o) { if (o < 0 || o + 4 > N) throw new Error("oob"); return dv.getUint32(o, true); }
+    function i32(o) { if (o < 0 || o + 4 > N) throw new Error("oob"); return dv.getInt32(o, true); }
+    function u16(o) { if (o < 0 || o + 2 > N) throw new Error("oob"); return dv.getUint16(o, true); }
+    // posisi field f dari tabel t (atau -1 kalau tidak ada)
+    function field(t, f) {
+      var vt = t - i32(t);
+      var vsz = u16(vt);
+      var slot = 4 + 2 * f;
+      if (slot + 2 > vsz) return -1;
+      var off = u16(vt + slot);
+      return off === 0 ? -1 : t + off;
+    }
+    function follow(pos) { return pos + u32(pos); }
+    function str(a) {
+      var n = u32(a);
+      if (a + 4 + n > N) throw new Error("oob");
+      return new TextDecoder("utf-8").decode(bytes.subarray(a + 4, a + 4 + n));
+    }
+    try {
+      // header: [u32 ukuran][u32 0][u32 0x11223344] lalu FlatBuffer di offset 12
+      if (u32(8) !== 0x11223344) return null;
+      var base = 12;
+      var rootT = base + u32(base);
+      var p0 = field(rootT, 0);
+      if (p0 < 0) return null;
+      var doc = follow(p0);
+      var pv = field(doc, 0);
+      if (pv < 0) return null;
+      var vec = follow(pv);
+      var n = u32(vec);
+      if (n < 1 || n > 4096) return null;
+      var out = [];
+      for (var k = 0; k < n; k++) {
+        var e = vec + 4 + 4 * k;
+        var run = e + u32(e);
+        var ps = field(run, 0);
+        if (ps >= 0) out.push(str(follow(ps)));
+      }
+      return out.join("");
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // cadangan: teks dalam JSON (mis. MOGRT) -> "mText":"..."
+  function jsonText(bytes) {
+    var s;
+    try { s = new TextDecoder("utf-8").decode(bytes); } catch (e) { return null; }
+    var re = /"mText"\s*:\s*"((?:[^"\\]|\\.)*)"/g, m, out = [];
+    while ((m = re.exec(s)) !== null) {
+      try { out.push(JSON.parse('"' + m[1] + '"')); } catch (e) { out.push(m[1]); }
+    }
+    return out.length ? out.join("\n") : null;
+  }
+
+  function b64ToBytes(b64) {
+    var bin = atob(b64.replace(/\s+/g, ""));
+    var arr = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+    return arr;
+  }
+
+  // ---------------------------------------------------------------- baca file
+  function gunzipToText(buf) {
+    var u8 = new Uint8Array(buf);
+    var isGzip = u8.length > 2 && u8[0] === 0x1f && u8[1] === 0x8b;
+    if (!isGzip) return Promise.resolve(new TextDecoder("utf-8").decode(u8));
+    if (typeof DecompressionStream === "undefined") {
+      return Promise.reject(new Error("This browser does not support DecompressionStream. Use a recent Chrome, Edge, or Firefox."));
+    }
+    var ds = new DecompressionStream("gzip");
+    var stream = new Blob([u8]).stream().pipeThrough(ds);
+    return new Response(stream).text();
+  }
+
+  function child(el, name) {
+    for (var c = el.firstElementChild; c; c = c.nextElementSibling) if (c.tagName === name) return c;
+    return null;
+  }
+  function childText(el, name) { var c = child(el, name); return c ? c.textContent : ""; }
+  function path(el, names) {
+    var cur = el;
+    for (var i = 0; i < names.length && cur; i++) cur = child(cur, names[i]);
+    return cur;
+  }
+  function kids(el, name) {
+    var out = [];
+    for (var c = el.firstElementChild; c; c = c.nextElementSibling) if (c.tagName === name) out.push(c);
+    return out;
+  }
+
+  /* Hasil: { sequences: [{ name, tracks: [{ index, clips: [{start,end,text,track}] , textCount }], total }],
+              stats: {...} } */
+  function parseProject(xmlText) {
+    var doc = new DOMParser().parseFromString(xmlText, "text/xml");
+    if (doc.getElementsByTagName("parsererror").length) throw new Error("The project XML could not be read (corrupted file?).");
+    var byId = {}, byUid = {}, i, all = doc.getElementsByTagName("*");
+    for (i = 0; i < all.length; i++) {
+      var a = all[i].getAttribute("ObjectID");
+      if (a) byId[a] = all[i];
+      var u = all[i].getAttribute("ObjectUID");
+      if (u) byUid[u] = all[i];
+    }
+
+    // blob teks per hash (blob identik hanya ditulis sekali)
+    var blobByHash = {};
+    var arbs = doc.getElementsByTagName("ArbVideoComponentParam");
+    for (i = 0; i < arbs.length; i++) {
+      var kv = child(arbs[i], "StartKeyframeValue");
+      if (kv && kv.textContent.replace(/\s+/g, "").length > 0) {
+        blobByHash[kv.getAttribute("BinaryHash")] = kv.textContent;
+      }
+    }
+    var textCache = {};
+    var stats = { arbParams: arbs.length, decoded: 0, undecodable: 0 };
+    function textOfParam(p) {
+      if (p.tagName !== "ArbVideoComponentParam") return null;
+      var kv = child(p, "StartKeyframeValue");
+      if (!kv) return null;
+      var hash = kv.getAttribute("BinaryHash");
+      var b64 = kv.textContent.replace(/\s+/g, "") || (blobByHash[hash] || "").replace(/\s+/g, "");
+      if (!b64) return null;
+      var key = hash || b64;
+      if (Object.prototype.hasOwnProperty.call(textCache, key)) return textCache[key];
+      var bytes;
+      try { bytes = b64ToBytes(b64); } catch (e) { textCache[key] = null; return null; }
+      var t = fbText(bytes);
+      if (t === null) t = jsonText(bytes);
+      textCache[key] = t;
+      if (t === null) stats.undecodable++; else stats.decoded++;
+      return t;
+    }
+
+    function textOfItem(item) {
+      var owner = path(item, ["ClipTrackItem", "ComponentOwner", "Components"]);
+      if (!owner) return null;
+      var chain = byId[owner.getAttribute("ObjectRef")];
+      if (!chain) return null;
+      var comps = path(chain, ["ComponentChain", "Components"]);
+      if (!comps) return null;
+      var texts = [];
+      var cl = kids(comps, "Component");
+      for (var c = 0; c < cl.length; c++) {
+        var comp = byId[cl[c].getAttribute("ObjectRef")];
+        if (!comp) continue;
+        var prefs = comp.getElementsByTagName("Param");
+        for (var k = 0; k < prefs.length; k++) {
+          var ref = prefs[k].getAttribute("ObjectRef");
+          var p = ref ? byId[ref] : null;
+          if (!p) continue;
+          var t = textOfParam(p);
+          if (t !== null && t !== "") texts.push(t);
+        }
+      }
+      return texts.length ? texts.join("\n") : null;
+    }
+
+    var seqs = [], sl = doc.getElementsByTagName("Sequence");
+    for (i = 0; i < sl.length; i++) {
+      var sEl = sl[i];
+      // Sequence memakai ObjectUID (bukan ObjectID); elemen referensi <Sequence ObjectURef=".."/> tidak punya TrackGroups
+      if (!(sEl.getAttribute("ObjectID") || sEl.getAttribute("ObjectUID")) || !child(sEl, "TrackGroups")) continue;
+      var seq = { name: childText(sEl, "Name") || "(untitled)", tracks: [], total: 0 };
+      var groups = kids(child(sEl, "TrackGroups"), "TrackGroup");
+      for (var g = 0; g < groups.length; g++) {
+        var second = child(groups[g], "Second");
+        var grp = second ? byId[second.getAttribute("ObjectRef")] : null;
+        if (!grp || grp.tagName !== "VideoTrackGroup") continue;
+        var tracksEl = path(grp, ["TrackGroup", "Tracks"]);
+        if (!tracksEl) continue;
+        var tl = kids(tracksEl, "Track");
+        for (var t = 0; t < tl.length; t++) {
+          var tEl = byUid[tl[t].getAttribute("ObjectURef")];
+          var tr = { index: parseInt(tl[t].getAttribute("Index"), 10), clips: [], textCount: 0 };
+          if (tEl) {
+            var items = tEl.getElementsByTagName("TrackItems");
+            if (items.length) {
+              var refs = kids(items[0], "TrackItem");
+              for (var r = 0; r < refs.length; r++) {
+                var item = byId[refs[r].getAttribute("ObjectRef")];
+                if (!item || item.tagName !== "VideoClipTrackItem") continue;
+                var ti = path(item, ["ClipTrackItem", "TrackItem"]);
+                if (!ti) continue;
+                var st = parseFloat(childText(ti, "Start") || "0") / TPS;
+                var en = parseFloat(childText(ti, "End")) / TPS;
+                var txt = textOfItem(item);
+                tr.clips.push({ start: st, end: en, text: txt, track: tr.index });
+                if (txt !== null) tr.textCount++;
+              }
+            }
+          }
+          seq.tracks.push(tr);
+          seq.total += tr.textCount;
+        }
+      }
+      seqs.push(seq);
+    }
+    return { sequences: seqs, stats: stats };
+  }
+
+  function readFile(buf) {
+    return gunzipToText(buf).then(parseProject);
+  }
+
+  // ---------------------------------------------------------------- SRT
+  function pad(n, w) { var s = String(n); while (s.length < w) s = "0" + s; return s; }
+  function fmtTime(sec) {
+    var ms = Math.round(Math.max(0, sec) * 1000);
+    var h = Math.floor(ms / 3600000); ms -= h * 3600000;
+    var m = Math.floor(ms / 60000); ms -= m * 60000;
+    var s = Math.floor(ms / 1000); ms -= s * 1000;
+    return pad(h, 2) + ":" + pad(m, 2) + ":" + pad(s, 2) + "," + pad(ms, 3);
+  }
+  function cleanText(t) {
+    return String(t).replace(/\r\n|\r|\u2028|\u2029/g, "\n").replace(/\u0000/g, "")
+      .replace(/[ \t]+\n/g, "\n").replace(/\n{2,}/g, "\n").replace(/^\s+|\s+$/g, "");
+  }
+
+  /* seq: satu elemen dari parseProject().sequences; opts: { tracks: [index...] | null (semua), offset } */
+  function buildCues(seq, opts) {
+    opts = opts || {};
+    var offset = Number(opts.offset) || 0;
+    var allowed = opts.tracks && opts.tracks.length ? opts.tracks : null;
+    var cues = [], skipped = 0;
+    seq.tracks.forEach(function (tr) {
+      if (allowed && allowed.indexOf(tr.index) === -1) return;
+      tr.clips.forEach(function (c) {
+        if (c.text === null) return;
+        var text = cleanText(c.text);
+        var s = c.start + offset, e = c.end + offset;
+        if (!text || !(e > s) || e <= 0) { skipped++; return; }
+        cues.push({ start: Math.max(0, s), end: e, text: text, track: c.track });
+      });
+    });
+    cues.sort(function (a, b) { return a.start - b.start || a.track - b.track; });
+    return { cues: cues, skipped: skipped };
+  }
+
+  function toSrt(cues) {
+    var out = [];
+    for (var i = 0; i < cues.length; i++) {
+      out.push(String(i + 1));
+      out.push(fmtTime(cues[i].start) + " --> " + fmtTime(cues[i].end));
+      out.push(cues[i].text.split("\n").join("\r\n"));
+      out.push("");
+    }
+    return out.join("\r\n");
+  }
+
+  var api = { readFile: readFile, parseProject: parseProject, gunzipToText: gunzipToText, buildCues: buildCues, toSrt: toSrt, fmtTime: fmtTime, fbText: fbText, TPS: TPS };
+  if (typeof module !== "undefined" && module.exports) module.exports = api;
+  root.PrprojSRT = api;
+})(typeof window !== "undefined" ? window : this);
+
+</script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var P = window.PrprojSRT;
+  var project = null, fileName = "subtitle", current = "";
+
+  function setStatus(msg, kind) { $("status").textContent = msg; $("status").className = kind || ""; }
+
+  function handleFile(file) {
+    if (!file) return;
+    fileName = file.name.replace(/\.prproj$/i, "");
+    setStatus("Reading " + file.name + "...", "warn");
+    $("opts").classList.add("hidden"); $("preview").classList.add("hidden");
+    file.arrayBuffer().then(P.readFile).then(function (res) {
+      project = res;
+      $("drop").classList.add("has");
+      $("dropMsg").innerHTML = "<strong>" + esc(file.name) + "</strong> &nbsp;(click to change file)";
+      fillSequences();
+    }).catch(function (e) {
+      project = null;
+      setStatus("Could not read the file: " + (e && e.message ? e.message : e), "error");
+    });
+  }
+
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+
+  function fillSequences() {
+    var sel = $("seq");
+    sel.innerHTML = "";
+    var best = -1, bestTotal = 0;
+    project.sequences.forEach(function (s, i) {
+      var o = document.createElement("option");
+      o.value = String(i);
+      o.textContent = s.name + "  (" + s.total + " text clips)";
+      sel.appendChild(o);
+      if (s.total > bestTotal) { bestTotal = s.total; best = i; }
+    });
+    if (!project.sequences.length) { setStatus("No sequences found in this project.", "error"); return; }
+    if (bestTotal === 0) {
+      var st = project.stats;
+      setStatus("No text clips could be read in this project.\n(" + st.arbParams + " text parameters found, " + st.undecodable + " could not be decoded.)", "error");
+      return;
+    }
+    sel.value = String(best);
+    $("opts").classList.remove("hidden");
+    fillTracks();
+  }
+
+  function fillTracks() {
+    var s = project.sequences[parseInt($("seq").value, 10)];
+    var box = $("tracks");
+    box.innerHTML = "";
+    s.tracks.forEach(function (t) {
+      if (!t.textCount) return;
+      var l = document.createElement("label");
+      var c = document.createElement("input");
+      c.type = "checkbox"; c.checked = true; c.value = String(t.index);
+      c.addEventListener("change", render);
+      l.appendChild(c);
+      l.appendChild(document.createTextNode("V" + (t.index + 1) + " (" + t.textCount + " text clips)"));
+      box.appendChild(l);
+    });
+    render();
+  }
+
+  function render() {
+    var s = project.sequences[parseInt($("seq").value, 10)];
+    var tracks = [].slice.call(document.querySelectorAll("#tracks input:checked")).map(function (c) { return parseInt(c.value, 10); });
+    if (!tracks.length) { current = ""; $("preview").classList.add("hidden"); $("btnSave").disabled = $("btnCopy").disabled = true; setStatus("Select at least one track.", "error"); return; }
+    var built = P.buildCues(s, { tracks: tracks, offset: parseFloat($("offset").value) || 0 });
+    if (!built.cues.length) { current = ""; $("preview").classList.add("hidden"); $("btnSave").disabled = $("btnCopy").disabled = true; setStatus("No cues left (check the time shift).", "error"); return; }
+    current = P.toSrt(built.cues);
+    $("preview").value = current;
+    $("preview").classList.remove("hidden");
+    $("btnSave").disabled = $("btnCopy").disabled = false;
+    var msg = built.cues.length + " cues ready from sequence \"" + s.name + "\".";
+    if (built.skipped) msg += "\n" + built.skipped + " clips skipped (empty text or zero duration).";
+    setStatus(msg, built.skipped ? "warn" : "ok");
+  }
+
+  $("drop").addEventListener("click", function () { $("file").click(); });
+  $("drop").addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); $("file").click(); } });
+  $("file").addEventListener("change", function (e) { handleFile(e.target.files[0]); });
+  ["dragenter", "dragover"].forEach(function (ev) { $("drop").addEventListener(ev, function (e) { e.preventDefault(); $("drop").classList.add("over"); }); });
+  ["dragleave", "drop"].forEach(function (ev) { $("drop").addEventListener(ev, function (e) { e.preventDefault(); $("drop").classList.remove("over"); }); });
+  $("drop").addEventListener("drop", function (e) { handleFile(e.dataTransfer.files[0]); });
+  $("seq").addEventListener("change", fillTracks);
+  $("offset").addEventListener("input", function () { if (project) render(); });
+
+  $("btnSave").addEventListener("click", function () {
+    if (!current) return;
+    var s = project.sequences[parseInt($("seq").value, 10)];
+    var blob = new Blob([current], { type: "application/x-subrip;charset=utf-8" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = (s.name || fileName).replace(/[\\\/:*?"<>|]+/g, "_") + ".srt";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+  });
+  $("btnCopy").addEventListener("click", function () {
+    $("preview").focus(); $("preview").select();
+    var ok = false; try { ok = document.execCommand("copy"); } catch (e) {}
+    setStatus(ok ? "SRT text copied to the clipboard." : "Automatic copy failed. The text is selected; press Ctrl+C.", ok ? "ok" : "warn");
+  });
+})();
+</script>
+</body>
+</html>

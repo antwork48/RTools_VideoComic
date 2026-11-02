@@ -1,4 +1,4 @@
-/* RTools Comic: shared navigation + tool list.
+/* RTools - Video Editing: shared navigation + tool list.
    To add a tool, add one object to RTOOLS.tools below. The navbar on every page and the cards on the home page update automatically. */
 (()=>{
 const base=new URL('.',document.currentScript.src),X=location.protocol==='file:'?'index.html':'';
@@ -13,7 +13,9 @@ ICON.bubble='<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-w
 ICON.chat='<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"><rect x="4" y="18" width="40" height="22" rx="6"/><rect x="9" y="7" width="17" height="13" rx="4" fill="currentColor" fill-opacity=".3"/><path d="M13 29.500h22"/></svg>';
 ICON.battle='<svg viewBox="0 0 48 48" fill="currentColor"><path d="M16 7h28l-4 12H12z"/><path d="M10 24h28l-4 10H6z" fill-opacity=".4"/><path d="M14 38h22l-3 7H11z" fill-opacity=".4"/></svg>';
 ICON.vfx='<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"><rect x="5" y="14" width="38" height="26" rx="5"/><path d="M17 5l7 9 7-9"/><path d="M11 23h18M11 30h11" stroke-width="3"/><circle cx="36" cy="27" r="1.800" fill="currentColor"/></svg>';
-window.RTOOLS={X,brand:'RTools Comic',tools:[
+ICON.popout='<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"><path d="M6 40 8 22 17 28 19 14 27 24 34 12 36 26 44 22 40 40z"/><circle cx="24" cy="15" r="6" fill="currentColor" fill-opacity=".35"/></svg>';
+ICON.srt='<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"><rect x="5" y="9" width="38" height="30" rx="5"/><path d="M12 21h10M26 21h10M12 29h6M22 29h14"/></svg>';
+window.RTOOLS={X,brand:'RTools - Video Editing',tools:[
  {name:'SFX Animator',dir:'sfx_animator',icon:ICON.sfx,desc:'Animated onomatopoeia text, JJBA style. Curves, gradients, strokes, wiggle, shake, and textures.',tag:'Exports WebM, MP4, PNG sequence, GIF'},
  {name:'Comic SFX Maker',dir:'comic_sfx',icon:ICON.comic,desc:'American comic sound effects: POW and BAM text over Ben-Day dot bursts with extruded 3D lettering.',tag:'Exports PNG, PNG sequence, WebM, MP4, GIF'},
  {name:'Comic Bubble Maker',dir:'bubble',icon:ICON.bubble,desc:'Animated comic speech bubbles: speech, thought, shout, whisper, and more, with halftone shading and typewriter text.',tag:'Exports PNG, PNG sequence, WebM, MP4, GIF'},
@@ -21,7 +23,9 @@ window.RTOOLS={X,brand:'RTools Comic',tools:[
  {name:'Image Cropper',dir:'crop',icon:ICON.crop,desc:'Crop pasted screenshots to an exact pixel size, add a frame and shadow, and export static PNG or an animated clip.',tag:'Exports PNG, ZIP, WebM, MP4, GIF'},
  {name:'Chat Maker',dir:'chat',icon:ICON.chat,desc:'Stream chat overlays that size themselves to the text: 7 designs, 18 theme colors, and batch export for many messages.',tag:'Exports PNG, batch ZIP, WebM, MP4, GIF'},
  {name:'Battle UI Maker',dir:'battle',icon:ICON.battle,desc:'Angular red-and-black game UI: an animated combat command menu and dialogue box, with theme colors and auto-cycling highlight.',tag:'Exports PNG, PNG sequence, WebM, MP4, GIF'},
- {name:'Retro Video FX',dir:'videofx',icon:ICON.vfx,desc:'Import a video and add VHS, CRT, TV glitch, or camcorder looks, with chromatic aberration and lens distortion. Exports MP4 with audio.',tag:'Imports video, exports MP4 and PNG'}
+ {name:'Retro Video FX',dir:'videofx',icon:ICON.vfx,desc:'Import a video and add VHS, CRT, TV glitch, or camcorder looks, with chromatic aberration and lens distortion. Exports MP4 with audio.',tag:'Imports video, exports MP4 and PNG'},
+ {name:'Pop-Out Frame',dir:'popout',icon:ICON.popout,desc:'Put a character PNG inside a burst or comic frame and let the head and sides break out of it. Layered frames, stars, and animation.',tag:'Imports PNG, exports PNG, WebM, MP4, GIF'},
+ {name:'Premiere to SRT',dir:'srt',icon:ICON.srt,desc:'Read the text clips from a Premiere project file (.prproj) and save them as an .srt subtitle file, with track selection and time shift.',tag:'Imports .prproj, exports SRT'}
 ]};
 const HOME='<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"><path d="M6 22 24 7l18 15v17a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3z"/><path d="M19 42V29h10v13"/></svg>';
 class RtNav extends HTMLElement{
@@ -45,7 +49,7 @@ nav{height:52px;display:flex;align-items:center;gap:18px;padding:0 max(16px,calc
 a:focus-visible{outline:2px solid #fb923c;outline-offset:2px}
 @media(max-width:560px){.brand span{display:none}nav{gap:10px;padding:0 12px}.links a{padding:8px 8px}.links a[aria-current]{padding:8px 12px 8px 10px}}
 </style><nav aria-label="Main"><a class="brand" href="${base.href+X}"><b>R</b><span>${B.brand}</span></a><div class="links">${items.map(i=>`<a href="${i.href}"${i.on?' aria-current="page"':` title="${i.name}"`} aria-label="${i.name}">${i.icon}<span>${i.name}</span></a>`).join('')}</div></nav>`;
-  const cur=r.querySelector('[aria-current]'),LK=r.querySelector('.links');if(cur)requestAnimationFrame(()=>{LK.scrollLeft=cur.offsetLeft-LK.clientWidth/2+cur.offsetWidth/2});
+  const cur=r.querySelector('[aria-current]'),LK=r.querySelector('.links');if(cur)(window.requestAnimationFrame||setTimeout)(()=>{LK.scrollLeft=cur.offsetLeft-LK.clientWidth/2+cur.offsetWidth/2});
  }}
 if(!customElements.get('rtools-nav'))customElements.define('rtools-nav',RtNav);
 const st=document.createElement('style');st.textContent='rtools-nav{display:block;position:sticky;top:env(safe-area-inset-top,0px);z-index:20}:root{--nav-h:52px}';

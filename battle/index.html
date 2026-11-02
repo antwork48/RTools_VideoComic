@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Battle UI Maker – RTools Comic</title>
+<title>Battle UI Maker – RTools - Video Editing</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Black+Han+Sans&family=Dela+Gothic+One&family=Manrope:wght@400;600;800&family=Oswald:wght@500;700&family=Rubik+Mono+One&family=Teko:wght@500;700&display=swap" rel="stylesheet">
@@ -270,7 +270,7 @@ function zip(fs){const parts=[],cd=[],enc=new TextEncoder();let off=0;
 
 let DL=null;const msg=m=>$('#msg').textContent=m,btn=v=>['#bs','#bw','#bm','#bp','#bg'].forEach(s=>$(s).disabled=v);
 async function run(fn){if(busy)return;busy=true;btn(true);
- try{await document.fonts.load(`${P.size}px "${P.font}"`,P.text);await fn();}
+ try{await document.fonts.load(`60px "${P.font}"`,P.cmds+P.wcmds+P.line+P.name);await fn();}
  catch(e){msg(e&&e.code==='declined'?'Cancelled.':'Export failed: '+(e.message||e.code||e))}
  busy=false;btn(false)}
 $('#bp').onclick=()=>run(async()=>{
