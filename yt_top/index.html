@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>YouTube Top Videos – RTools - Video Editing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+<script src="../nav.js"></script>
+<style>
+:root{--bg:#0e0b14;--card:#171222;--text:#ece8f5;--muted:#9a90b0;--line:#2a2238;--accent:#8b5cf6;--accent2:#c4b5fd;--accent-soft:rgba(139,92,246,.16);--hot:#fb923c;--err:#f87171;color-scheme:dark;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;font:15px/1.5 Manrope,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100%}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+.wrap{max-width:1200px;margin:0 auto;padding:24px 16px 64px}
+h1{font:800 22px/1.15 Manrope,sans-serif;letter-spacing:-.01em;margin:0 0 4px}
+.sub{color:var(--muted);margin:0 0 20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
+label{display:block;font-size:13px;color:var(--muted);margin:0 0 4px}
+input,select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text);font:inherit}
+input[type=checkbox]{accent-color:var(--accent)}
+.row{display:grid;gap:12px;grid-template-columns:1fr 1fr}
+.row3{display:grid;gap:12px;grid-template-columns:1fr 1fr 1fr}
+@media (max-width:640px){.row,.row3{grid-template-columns:1fr}}
+.field{margin-bottom:12px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.chip{padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:var(--bg);color:var(--text);cursor:pointer;font:inherit;font-size:13px}
+.chip:hover{border-color:var(--hot)}
+.chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent2)}
+.chips select{width:auto;padding:5px 10px;border-radius:999px;font-size:13px}
+button.primary{background:var(--accent);color:#fff;border:1px solid var(--accent);border-radius:8px;padding:10px 18px;font:inherit;font-weight:600;cursor:pointer}
+button.primary:hover:not(:disabled){background:#7c3aed;border-color:var(--hot)}
+button.primary:disabled{opacity:.6;cursor:wait}
+button.ghost{background:transparent;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:9px 14px;font:inherit;cursor:pointer}
+button.ghost:hover{border-color:var(--accent)}
+:focus-visible{outline:2px solid var(--hot);outline-offset:2px}
+.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.check{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--text);margin:0}
+.check input{width:auto}
+#status{color:var(--muted);font-size:14px;min-height:20px}
+#status.err{color:var(--err)}
+.chan{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+.chan img{width:44px;height:44px;border-radius:50%}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+td.num,th.num{text-align:right;white-space:nowrap}
+.vid{display:flex;gap:10px;align-items:center}
+.vid img{width:120px;height:68px;object-fit:cover;border-radius:6px;flex:none}
+.vid a{color:var(--text);text-decoration:none;font-weight:600}
+.vid a:hover{color:var(--hot)}
+.rank{color:var(--muted);width:32px}
+.scroll{overflow-x:auto}
+.hint{font-size:12px;color:var(--muted);margin-top:6px}
+[hidden]{display:none!important}
+@media (max-width:640px){.vid img{width:84px;height:48px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>YouTube Top Videos Filter</h1>
+  <p class="sub">Find the most-viewed videos on a YouTube channel within a date range.</p>
+
+  <div class="card">
+    <div class="row">
+      <div class="field">
+        <label for="apikey">YouTube Data API key</label>
+        <input id="apikey" type="password" placeholder="AIza..." autocomplete="off">
+        <div class="hint">Stored only in your browser (localStorage) and sent only to Google.</div>
+      </div>
+      <div class="field">
+        <label for="channel">Channel (URL, @handle, or UC... ID)</label>
+        <input id="channel" placeholder="https://youtube.com/@channelname">
+      </div>
+    </div>
+
+    <label>Date range</label>
+    <div class="chips" id="chips">
+      <button class="chip" data-p="1m">Last 1 month</button>
+      <button class="chip" data-p="3m">Last 3 months</button>
+      <button class="chip" data-p="6m">Last 6 months</button>
+      <button class="chip on" data-p="1y">Last 1 year</button>
+      <select id="year" title="Pick a calendar year"><option value="">Year…</option></select>
+    </div>
+    <div class="row3">
+      <div class="field"><label for="from">From date</label><input id="from" type="date"></div>
+      <div class="field"><label for="to">To date</label><input id="to" type="date"></div>
+      <div class="field">
+        <label for="topn">Show top</label>
+        <input id="topn" type="number" min="1" max="5000" step="1" value="20" list="topn-presets" inputmode="numeric">
+        <datalist id="topn-presets"><option value="10"><option value="20"><option value="50"><option value="100"><option value="200"></datalist>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="primary" id="go">Find videos</button>
+      <label class="check"><input type="checkbox" id="noshorts"> Hide Shorts (≤ 60 sec)</label>
+      <span id="status"></span>
+    </div>
+  </div>
+
+  <div class="card" id="result" hidden>
+    <div class="chan" id="chan"></div>
+    <div class="actions" style="justify-content:space-between;margin-bottom:8px">
+      <div id="summary" class="hint" style="margin:0"></div>
+      <button class="ghost" id="csv">Download CSV</button>
+    </div>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>#</th><th>Video</th><th>Published</th><th class="num">Views</th><th class="num">Likes</th><th class="num">Duration</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const fmtNum = n => Number(n).toLocaleString('en-US');
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(2, '0');
+const toISODate = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+let lastRows = [];
+
+// ---- Date / preset setup ----
+const now = new Date();
+for (let y = now.getFullYear(); y >= 2006; y--) {
+  const o = document.createElement('option'); o.value = y; o.textContent = y; $('year').appendChild(o);
+}
+function clearChips(){ document.querySelectorAll('.chip').forEach(c => c.classList.remove('on')); $('year').value=''; }
+function applyPreset(p){
+  const to = new Date(), from = new Date();
+  if (p === '1m') from.setMonth(from.getMonth() - 1);
+  if (p === '3m') from.setMonth(from.getMonth() - 3);
+  if (p === '6m') from.setMonth(from.getMonth() - 6);
+  if (p === '1y') from.setFullYear(from.getFullYear() - 1);
+  $('from').value = toISODate(from); $('to').value = toISODate(to);
+}
+document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => {
+  clearChips(); c.classList.add('on'); applyPreset(c.dataset.p);
+}));
+$('year').addEventListener('change', e => {
+  const y = e.target.value; if (!y) return;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+  $('from').value = `${y}-01-01`; $('to').value = `${y}-12-31`;
+});
+['from','to'].forEach(id => $(id).addEventListener('input', () => { document.querySelectorAll('.chip').forEach(c => c.classList.remove('on')); $('year').value=''; }));
+applyPreset('1y');
+try { $('apikey').value = localStorage.getItem('yt_api_key') || ''; $('channel').value = localStorage.getItem('yt_channel') || ''; } catch(e){}
+
+// ---- API ----
+let KEY = '';
+async function api(path, params){
+  const url = new URL('https://www.googleapis.com/youtube/v3/' + path);
+  Object.entries({...params, key: KEY}).forEach(([k,v]) => url.searchParams.set(k, v));
+  const r = await fetch(url);
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error?.message || ('HTTP ' + r.status));
+  return j;
+}
+async function resolveChannel(input){
+  input = input.trim();
+  let m, params = {part: 'snippet,contentDetails'};
+  if ((m = input.match(/(UC[\w-]{22})/))) params.id = m[1];
+  else if ((m = input.match(/@([\w.\-]+)/))) params.forHandle = '@' + m[1];
+  else if ((m = input.match(/youtube\.com\/user\/([\w.\-]+)/))) params.forUsername = m[1];
+  else params.forHandle = '@' + input.replace(/^@/, '');
+  const j = await api('channels', params);
+  if (!j.items || !j.items.length) throw new Error('Channel not found. Check the URL/handle.');
+  return j.items[0];
+}
+function parseDur(iso){
+  const m = /PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/.exec(iso || '') || [];
+  return (+m[1]||0)*3600 + (+m[2]||0)*60 + (+m[3]||0);
+}
+const fmtDur = s => { const h=Math.floor(s/3600), m=Math.floor(s%3600/60), x=s%60; return h ? `${h}:${pad(m)}:${pad(x)}` : `${m}:${pad(x)}`; };
+const setStatus = (t, err) => { $('status').textContent = t; $('status').className = err ? 'err' : ''; };
+
+// ---- Main ----
+$('go').addEventListener('click', async () => {
+  KEY = $('apikey').value.trim();
+  const chInput = $('channel').value;
+  if (!KEY) return setStatus('Please enter your API key.', true);
+  if (!chInput.trim()) return setStatus('Please enter a channel.', true);
+  if (!$('from').value || !$('to').value) return setStatus('Please set a date range.', true);
+  const from = new Date($('from').value + 'T00:00:00');
+  const to = new Date($('to').value + 'T23:59:59.999');
+  if (from > to) return setStatus('The "From" date must be before the "To" date.', true);
+  const topN = Math.floor(+$('topn').value);
+  if (!(topN >= 1)) return setStatus('Enter a number of videos of 1 or more.', true);
+  try { localStorage.setItem('yt_api_key', KEY); localStorage.setItem('yt_channel', chInput); } catch(e){}
+
+  $('go').disabled = true; $('result').hidden = true;
+  try {
+    setStatus('Looking up channel…');
+    const ch = await resolveChannel(chInput);
+    const uploads = ch.contentDetails.relatedPlaylists.uploads;
+
+    // Collect video IDs in range (uploads playlist is newest -> oldest)
+    const ids = []; let token = '', pages = 0, done = false;
+    while (!done && pages < 400) {
+      setStatus(`Fetching video list… (${ids.length} in range)`);
+      const j = await api('playlistItems', {part: 'contentDetails', playlistId: uploads, maxResults: 50, ...(token ? {pageToken: token} : {})});
+      for (const it of j.items || []) {
+        const pub = new Date(it.contentDetails.videoPublishedAt);
+        if (pub < from) { done = true; break; }
+        if (pub <= to) ids.push(it.contentDetails.videoId);
+      }
+      token = j.nextPageToken; pages++;
+      if (!token) done = true;
+    }
+
+    // Fetch stats
+    const vids = [];
+    for (let i = 0; i < ids.length; i += 50) {
+      setStatus(`Fetching stats… ${Math.min(i+50, ids.length)}/${ids.length}`);
+      const j = await api('videos', {part: 'snippet,statistics,contentDetails', id: ids.slice(i, i+50).join(','), maxResults: 50});
+      for (const v of j.items || []) {
+        vids.push({
+          id: v.id, title: v.snippet.title, published: v.snippet.publishedAt,
+          thumb: (v.snippet.thumbnails.medium || v.snippet.thumbnails.default || {}).url,
+          views: +(v.statistics.viewCount || 0), likes: v.statistics.likeCount != null ? +v.statistics.likeCount : null,
+          dur: parseDur(v.contentDetails.duration)
+        });
+      }
+    }
+
+    let list = vids;
+    if ($('noshorts').checked) list = list.filter(v => v.dur > 60);
+    list.sort((a, b) => b.views - a.views);
+    const top = list.slice(0, topN);
+    lastRows = top;
+    render(ch, top, list.length, from, to);
+    setStatus('Done.');
+  } catch (e) {
+    setStatus('Failed: ' + e.message, true);
+  } finally { $('go').disabled = false; }
+});
+
+function render(ch, top, total, from, to){
+  $('chan').innerHTML = `<img src="${esc(ch.snippet.thumbnails.default.url)}" alt=""><div><strong>${esc(ch.snippet.title)}</strong><div class="hint" style="margin:0">${esc(ch.snippet.customUrl || ch.id)}</div></div>`;
+  $('summary').textContent = `Top ${top.length} of ${fmtNum(total)} videos • ${toISODate(from)} to ${toISODate(to)}`;
+  $('rows').innerHTML = top.length ? top.map((v, i) => `
+    <tr>
+      <td class="rank">${i+1}</td>
+      <td><div class="vid"><img src="${esc(v.thumb)}" alt="" loading="lazy"><a href="https://www.youtube.com/watch?v=${esc(v.id)}" target="_blank" rel="noopener">${esc(v.title)}</a></div></td>
+      <td style="white-space:nowrap">${toISODate(new Date(v.published))}</td>
+      <td class="num"><strong>${fmtNum(v.views)}</strong></td>
+      <td class="num">${v.likes == null ? '–' : fmtNum(v.likes)}</td>
+      <td class="num">${fmtDur(v.dur)}</td>
+    </tr>`).join('') : '<tr><td colspan="6" class="hint">No videos found in this range.</td></tr>';
+  $('result').hidden = false;
+}
+
+$('csv').addEventListener('click', () => {
+  if (!lastRows.length) return;
+  const q = s => '"' + String(s).replace(/"/g, '""') + '"';
+  const lines = [['rank','title','url','published','views','likes','duration'].join(',')];
+  lastRows.forEach((v, i) => lines.push([i+1, q(v.title), 'https://www.youtube.com/watch?v='+v.id, toISODate(new Date(v.published)), v.views, v.likes ?? '', fmtDur(v.dur)].join(',')));
+  const blob = new Blob(['\ufeff' + lines.join('\n')], {type: 'text/csv;charset=utf-8'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'youtube-top-videos.csv'; a.click();
+});
+</script>
+</body>
+</html>
