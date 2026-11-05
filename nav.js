@@ -15,6 +15,7 @@ ICON.battle='<svg viewBox="0 0 48 48" fill="currentColor"><path d="M16 7h28l-4 1
 ICON.vfx='<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"><rect x="5" y="14" width="38" height="26" rx="5"/><path d="M17 5l7 9 7-9"/><path d="M11 23h18M11 30h11" stroke-width="3"/><circle cx="36" cy="27" r="1.800" fill="currentColor"/></svg>';
 ICON.popout='<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"><path d="M6 40 8 22 17 28 19 14 27 24 34 12 36 26 44 22 40 40z"/><circle cx="24" cy="15" r="6" fill="currentColor" fill-opacity=".35"/></svg>';
 ICON.srt='<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"><rect x="5" y="9" width="38" height="30" rx="5"/><path d="M12 21h10M26 21h10M12 29h6M22 29h14"/></svg>';
+ICON.grid='<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"><rect x="6" y="6" width="36" height="36" rx="4"/><path d="M6 18h36M6 30h36M18 6v36M30 6v36" stroke-width="3"/></svg>';
 window.RTOOLS={X,brand:'RTools - Video Editing',tools:[
  {name:'SFX Animator',dir:'sfx_animator',icon:ICON.sfx,desc:'Animated onomatopoeia text, JJBA style. Curves, gradients, strokes, wiggle, shake, and textures.',tag:'Exports WebM, MP4, PNG sequence, GIF'},
  {name:'Comic SFX Maker',dir:'comic_sfx',icon:ICON.comic,desc:'American comic sound effects: POW and BAM text over Ben-Day dot bursts with extruded 3D lettering.',tag:'Exports PNG, PNG sequence, WebM, MP4, GIF'},
@@ -25,7 +26,8 @@ window.RTOOLS={X,brand:'RTools - Video Editing',tools:[
  {name:'Battle UI Maker',dir:'battle',icon:ICON.battle,desc:'Angular red-and-black game UI: an animated combat command menu and dialogue box, with theme colors and auto-cycling highlight.',tag:'Exports PNG, PNG sequence, WebM, MP4, GIF'},
  {name:'Retro Video FX',dir:'videofx',icon:ICON.vfx,desc:'Import a video and add VHS, CRT, TV glitch, or camcorder looks, with chromatic aberration and lens distortion. Exports MP4 with audio.',tag:'Imports video, exports MP4 and PNG'},
  {name:'Pop-Out Frame',dir:'popout',icon:ICON.popout,desc:'Put a character PNG inside a burst or comic frame and let the head and sides break out of it. Layered frames, stars, and animation.',tag:'Imports PNG, exports PNG, WebM, MP4, GIF'},
- {name:'Premiere to SRT',dir:'srt',icon:ICON.srt,desc:'Read the text clips from a Premiere project file (.prproj) and save them as an .srt subtitle file, with track selection and time shift.',tag:'Imports .prproj, exports SRT'}
+ {name:'Premiere to SRT',dir:'srt',icon:ICON.srt,desc:'Read the text clips from a Premiere project file (.prproj) and save them as an .srt subtitle file, with track selection and time shift.',tag:'Imports .prproj, exports SRT'},
+ {name:'Grid Maker',dir:'grid',icon:ICON.grid,desc:'Looping grid backgrounds for video: square, dots, isometric, hex, checker, and a retro perspective floor with sun. Glow, scroll, and edge fade.',tag:'Exports PNG, PNG sequence, WebM, MP4, GIF'}
 ]};
 const HOME='<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"><path d="M6 22 24 7l18 15v17a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3z"/><path d="M19 42V29h10v13"/></svg>';
 class RtNav extends HTMLElement{
